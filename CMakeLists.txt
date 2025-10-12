@@ -22,16 +22,17 @@ set(RADIOLIB_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/RadioLib")
 if (EXISTS "${RADIOLIB_ROOT}")
     collect_sources("${RADIOLIB_ROOT}/src" RADIOLIB_SOURCES RADIOLIB_HEADERS)
 
-    add_library(radiolib ${RADIOLIB_LIBRARY_TYPE} ${RADIOLIB_HEADERS} ${RADIOLIB_SOURCES})
+    add_library(radiolib ${RADIOLIB_LIBRARY_TYPE} ${RADIOLIB_SOURCES} ${RADIOLIB_HEADERS})
 
     target_include_directories(radiolib PUBLIC "${RADIOLIB_ROOT}/src")
     target_compile_features(radiolib PUBLIC cxx_std_20)
 endif ()
 
-if(TARGET radiolib)
+if (TARGET radiolib)
     add_library(PyRadioLib::radiolib ALIAS radiolib)
-endif()
+endif ()
 
+set(PYBIND11_FINDPYTHON ON)
 
 add_subdirectory(thirdparty/pybind11)
 
