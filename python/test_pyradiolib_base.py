@@ -1,18 +1,19 @@
 import pytest
+import datetime
+
 import pyradiolib
+
+from utils import *
 
 
 class TestPyRadioLibBase:
 
-    def test_hal(self):
-        hal = pyradiolib.RadioLibHal(0, 0, 0, 0, 0, 0)
+    def test_mock_hal(self):
+        hal = pyradiolib.MockHal(0, 0, 0, 0, 0, 0)
         assert hal is not None
 
-    # def test_module(self):
-    #     assert False
-    #     module = pyradiolib.Module(
-    #         nss=10,
-    #         irq=2,
-    #         nrst=3,
-    #         busy=9,
-    #     )
+        with assert_duration_lt(seconds=1):
+            hal.delay(1000)
+
+        with assert_duration_lt(seconds=1):
+            hal.delayMicroseconds(1000 * 1000)

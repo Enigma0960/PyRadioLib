@@ -8,6 +8,8 @@ class MockHal : public RadioLibHal {
 	using Super = RadioLibHal;
 
 public:
+	virtual ~MockHal() = default;
+
 	MockHal(uint32_t const input, uint32_t const output, uint32_t const low, uint32_t const high, uint32_t const rising, uint32_t const falling);
 
 	void pinMode(uint32_t pin, uint32_t mode) override;
@@ -25,6 +27,7 @@ public:
 	void spiTransfer(uint8_t* out, size_t len, uint8_t* in) override;
 	void spiEndTransaction() override;
 	void spiEnd() override;
+	void yield() override;
 };
 
 } // namespace PyRadioLib
