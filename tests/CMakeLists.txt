@@ -15,7 +15,7 @@ target_link_libraries(${TEST_APP} PUBLIC gtest)
 target_link_libraries(${TEST_APP} PUBLIC
         PyRadioLib::radiolib
         PyRadioLib::core
-        PyRadioLib::hal
+        PyRadioLib::mock
 )
 
 include(GoogleTest)

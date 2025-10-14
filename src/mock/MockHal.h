@@ -1,8 +1,12 @@
 #pragma once
 
+#include <vector>
+
+#include <mock/MockContext.h>
 #include <radiolib/Hal.h>
 
-namespace PyRadioLib {
+namespace pyradiolib {
+
 class MockHal : public RadioLibHal {
 	using Self = MockHal;
 	using Super = RadioLibHal;
@@ -10,7 +14,9 @@ class MockHal : public RadioLibHal {
 public:
 	virtual ~MockHal() = default;
 
-	MockHal(uint32_t const input, uint32_t const output, uint32_t const low, uint32_t const high, uint32_t const rising, uint32_t const falling);
+	MockHal(std::shared_ptr<MockContext> context, uint32_t const input, uint32_t const output, uint32_t const low, uint32_t const high, uint32_t const rising, uint32_t const falling);
+
+	std::shared_ptr<MockGpio> gpio() const;
 
 	void pinMode(uint32_t pin, uint32_t mode) override;
 	void digitalWrite(uint32_t pin, uint32_t value) override;
@@ -28,6 +34,9 @@ public:
 	void spiEndTransaction() override;
 	void spiEnd() override;
 	void yield() override;
+
+private:
+	std::shared_ptr<MockContext> _context;
 };
 
-} // namespace PyRadioLib
+} // namespace pyradiolib

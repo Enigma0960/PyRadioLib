@@ -5,7 +5,7 @@ set(MODULE_NAME "pyradiolib")
 pybind11_add_module(${MODULE_NAME} ${MODULE_SOURCES} ${MODULE_HEADERS})
 target_link_libraries(${MODULE_NAME} PRIVATE
         PyRadioLib::core
-        PyRadioLib::hal
+        PyRadioLib::mock
         PyRadioLib::radiolib
 )
 target_include_directories(${MODULE_NAME} PRIVATE

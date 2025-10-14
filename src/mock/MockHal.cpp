@@ -2,22 +2,51 @@
 
 #include <chrono>
 #include <thread>
+#include <utility>
 
-using namespace PyRadioLib;
+using namespace pyradiolib;
 using namespace std::chrono;
 
-MockHal::MockHal(uint32_t const input, uint32_t const output, uint32_t const low, uint32_t const high, uint32_t const rising, uint32_t const falling)
-    : Super(input, output, low, high, rising, falling) {
+MockHal::MockHal(std::shared_ptr<MockContext> context, uint32_t const input, uint32_t const output, uint32_t const low, uint32_t const high, uint32_t const rising, uint32_t const falling)
+    : Super(input, output, low, high, rising, falling)
+    , _context(std::move(context)) {
+}
+
+std::shared_ptr<MockGpio> MockHal::gpio() const {
+	return _context->gpio();
 }
 
 void MockHal::pinMode(uint32_t pin, uint32_t mode) {
+	if (!_context || !_context->gpio()) {
+		return;
+	}
+
+	if (_context->gpio()->contains(pin)) {
+		_context->gpio()->setPinMode(pin, mode);
+	}
 }
 
 void MockHal::digitalWrite(uint32_t pin, uint32_t value) {
+	if (!_context || !_context->gpio()) {
+		return;
+	}
+
+	if (_context->gpio()->contains(pin)) {
+		_context->gpio()->setPinOutput(pin, value > 0 ? 1 : 0);
+	}
 }
 
 uint32_t MockHal::digitalRead(uint32_t pin) {
-	return 42;
+	if (!_context || !_context->gpio()) {
+		return 0;
+	}
+
+	auto const opt = _context->gpio()->getPinOutput(pin);
+
+	if (opt.has_value()) {
+		return opt.value() > 0 ? 1 : 0;
+	}
+	return 0;
 }
 
 void MockHal::attachInterrupt(uint32_t interruptNum, void (*interruptCb)(void), uint32_t mode) {

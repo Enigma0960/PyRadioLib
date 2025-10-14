@@ -1,3 +1,3 @@
 add_subdirectory(core)
-add_subdirectory(hal)
+add_subdirectory(mock)
 add_subdirectory(py)
