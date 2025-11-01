@@ -23,7 +23,7 @@ struct PyHal : public RadioLibHal {
 	}
 
 	void attachInterrupt(uint32_t interruptNum, void (*interruptCb)(void), uint32_t mode) override {
-		PYBIND11_OVERRIDE_PURE(void, RadioLibHal, attachInterrupt, interruptNum, interruptCb, mode);
+		// PYBIND11_OVERRIDE_PURE(void, RadioLibHal, attachInterrupt, interruptNum, interruptCb, mode);
 	}
 
 	void detachInterrupt(uint32_t interruptNum) override {

@@ -3,11 +3,8 @@ import datetime
 
 import pyradiolib
 
-from utils import *
-
 
 class TestPyRadioLibBase:
-
     def test_mock_hal(self):
         hal = pyradiolib.MockHal(0, 0, 0, 0, 0, 0)
         assert hal is not None
@@ -29,3 +26,13 @@ class TestPyRadioLibBase:
 
         gpio = hal.gpio()
         assert gpio is not None
+
+    def test_module_init(self):
+        module = pyradiolib.Module()
+
+        assert module is not None
+
+        try:
+            module.init()
+        except Exception as e:
+            pytest.fail(f"Unexpected exception: {e}")

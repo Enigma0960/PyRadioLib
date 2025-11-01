@@ -1,2 +1,10 @@
 __author__ = 'Enigma0960'
 __version__ = '@PROJECT_VERSION@'
+
+try:
+    from . import pyradiolib as _ext
+except ImportError as exc:
+    raise ImportError("pyradiolib extension is not built or not found") from exc
+
+globals().update({k: v for k, v in _ext.__dict__.items() if not k.startswith("_")})
+del _ext

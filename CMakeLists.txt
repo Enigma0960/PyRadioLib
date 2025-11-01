@@ -11,6 +11,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+if (APPLE)
+    add_compile_definitions(PYBIND11_DETAILED_ERROR_MESSAGES=1)
+    add_compile_options(-ferror-limit=0 -fno-limit-debug-info)
+endif ()
+
+find_package(Python 3.8 COMPONENTS Interpreter Development.Module REQUIRED)
+
 
 set(RADIOLIB_LIBRARY_TYPE "SHARED" CACHE STRING "Library type for RadioLib (STATIC or SHARED)")
 set_property(CACHE RADIOLIB_LIBRARY_TYPE PROPERTY STRINGS STATIC SHARED)
@@ -43,6 +50,7 @@ set(PYBIND11_FINDPYTHON ON)
 add_subdirectory(thirdparty/pybind11)
 
 add_subdirectory(src)
+add_subdirectory(src/py)
 
 if (BUILD_TESTING)
     include(CTest)

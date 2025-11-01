@@ -26,8 +26,9 @@ void bind_hal(py::module_& module) {
 	    .def("digitalWrite", &RadioLibHal::digitalWrite, py::arg("pin"), py::arg("value"))
 	    .def("digitalRead", &RadioLibHal::digitalRead, py::arg("pin"))
 	    .def("attachInterrupt", [](RadioLibHal& self, uint32_t num, std::function<void()> const& cb, uint32_t mode) {
-			// если это чисто виртуальный метод, тут обычно бросают исключение:
-			throw std::runtime_error("attachInterrupt is only meaningful in concrete HAL implementations"); }, //
+		    // если это чисто виртуальный метод, тут обычно бросают исключение:
+		    //throw std::runtime_error("attachInterrupt is only meaningful in concrete HAL implementations");
+	    }, //
 	        py::arg("interruptNum"), py::arg("callback"), py::arg("mode"), //
 	        R"(Для Python-наследников реализуйте attachInterrupt в своём классе.)")
 	    .def("detachInterrupt", &RadioLibHal::detachInterrupt, py::arg("interruptNum"))
