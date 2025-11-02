@@ -1,36 +1,48 @@
 set(MODULE_NAME "pyradiolib")
-set(MODULE_BINDINGS_NAME "pyradiolib-bindings")
 
-collect_sources(${CMAKE_CURRENT_SOURCE_DIR} MODULE_SOURCES MODULE_HEADERS)
+collect_sources(${CMAKE_CURRENT_SOURCE_DIR}  MODULE_HEADERS MODULE_SOURCES)
 
-add_library(${MODULE_BINDINGS_NAME} OBJECT SHARED ${MODULE_SOURCES} ${MODULE_HEADERS})
-target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE
+pybind11_add_module(${MODULE_NAME} ${MODULE_SOURCES} ${MODULE_HEADERS})
+
+target_link_libraries(${MODULE_NAME} PRIVATE
         radiolib
         PyRadioLib::core
         PyRadioLib::mock
 )
-target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE pybind11::module)
-
-target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_INCLUDE_DIRS})
-target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_LIBRARIES})
-
-pybind11_add_module(${MODULE_NAME} $<TARGET_OBJECTS:${MODULE_BINDINGS_NAME}>)
-
-if (APPLE)
-    target_link_options(${MODULE_NAME} PRIVATE
-            -Wl,-dead_strip
-    )
-endif ()
-
-if (WIN32)
-    set_target_properties(${MODULE_NAME} PROPERTIES SUFFIX ".pyd")
-endif ()
-
-set_target_properties(${MODULE_NAME} PROPERTIES
-        BUILD_RPATH "$ORIGIN"                # искать рядом с модулем
-        INSTALL_RPATH "@loader_path"         # на инсталле — рядом с модулем
+target_include_directories(${MODULE_NAME} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+
+
+#add_library(${MODULE_BINDINGS_NAME} OBJECT SHARED ${MODULE_SOURCES} ${MODULE_HEADERS})
+#target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+#target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE
+#        radiolib
+#        PyRadioLib::core
+#        PyRadioLib::mock
+#)
+#target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE pybind11::module)
+#
+#target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_INCLUDE_DIRS})
+#target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_LIBRARIES})
+#
+#pybind11_add_module(${MODULE_NAME} $<TARGET_OBJECTS:${MODULE_BINDINGS_NAME}>)
+#
+#if (APPLE)
+#    target_link_options(${MODULE_NAME} PRIVATE
+#            -Wl,-dead_strip
+#    )
+#endif ()
+#
+#if (WIN32)
+#    set_target_properties(${MODULE_NAME} PROPERTIES SUFFIX ".pyd")
+#endif ()
+#
+#set_target_properties(${MODULE_NAME} PROPERTIES
+#        BUILD_RPATH "$ORIGIN"                # искать рядом с модулем
+#        INSTALL_RPATH "@loader_path"         # на инсталле — рядом с модулем
+#)
 
 set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin/${MODULE_NAME}")
 
