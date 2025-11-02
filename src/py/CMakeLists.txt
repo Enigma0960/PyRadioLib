@@ -3,9 +3,8 @@ set(MODULE_BINDINGS_NAME "pyradiolib-bindings")
 
 collect_sources(${CMAKE_CURRENT_SOURCE_DIR} MODULE_SOURCES MODULE_HEADERS)
 
-add_library(${MODULE_BINDINGS_NAME} OBJECT ${MODULE_SOURCES} ${MODULE_HEADERS})
-target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-)
+add_library(${MODULE_BINDINGS_NAME} OBJECT SHARED ${MODULE_SOURCES} ${MODULE_HEADERS})
+target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE
         radiolib
         PyRadioLib::core
@@ -28,12 +27,25 @@ if (WIN32)
     set_target_properties(${MODULE_NAME} PROPERTIES SUFFIX ".pyd")
 endif ()
 
-set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin/${MODULE_NAME}")
 set_target_properties(${MODULE_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
-        ARCHIVE_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
+        BUILD_RPATH "$ORIGIN"                # искать рядом с модулем
+        INSTALL_RPATH "@loader_path"         # на инсталле — рядом с модулем
 )
+
+set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin/${MODULE_NAME}")
+
+set_target_properties(${MODULE_NAME} PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
+        ARCHIVE_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
+        LIBRARY_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
+        ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
+)
+
 foreach (_cfg IN ITEMS Debug Release RelWithDebInfo MinSizeRel)
     string(TOUPPER "${_cfg}" _CFG)
     set_target_properties(${MODULE_NAME} PROPERTIES
@@ -58,12 +70,14 @@ add_custom_command(
         VERBATIM
 )
 
+
 add_custom_command(
         TARGET ${MODULE_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E env
         "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
         ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
         -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:${MODULE_NAME}>
         COMMENT "Generating pyradiolib with pybind11-stubgen"
         VERBATIM
 )
