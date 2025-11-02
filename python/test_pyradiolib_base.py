@@ -28,7 +28,7 @@ class TestPyRadioLibBase:
         assert gpio is not None
 
     def test_module_init(self):
-        module = pyradiolib.Module()
+        module = pyradiolib.Module(None, 0,0,0)
 
         assert module is not None
 

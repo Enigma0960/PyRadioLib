@@ -69,6 +69,10 @@ struct PyHal : public RadioLibHal {
 	void spiEnd() override {
 		PYBIND11_OVERRIDE_PURE(void, RadioLibHal, spiEnd, );
 	}
+
+	uint32_t pinToInterrupt(uint32_t pin) override {
+		PYBIND11_OVERRIDE_PURE(uint32_t, RadioLibHal, pinToInterrupt, pin );
+	}
 };
 
 void bind_hal(py::module_& module);

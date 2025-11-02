@@ -7,15 +7,15 @@ add_library(${MODULE_BINDINGS_NAME} OBJECT ${MODULE_SOURCES} ${MODULE_HEADERS})
 target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${RADIOLIB_INCLUDE_DIR}
-        ${CMAKE_BINARY_DIR}/include/radiolib
         ${pybind11_INCLUDE_DIR}
-        ${Python_INCLUDE_DIR}
 )
 target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE
         PyRadioLib::core
         PyRadioLib::mock
         PyRadioLib::radiolib
 )
+target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_INCLUDE_DIRS})
+target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_LIBRARIES})
 
 pybind11_add_module(${MODULE_NAME} $<TARGET_OBJECTS:${MODULE_BINDINGS_NAME}>)
 target_link_libraries(${MODULE_NAME} PRIVATE
@@ -31,7 +31,7 @@ target_include_directories(${MODULE_NAME} PRIVATE
 
 if (APPLE)
     target_link_options(${MODULE_NAME} PRIVATE
-            -Wl,-no_dead_strip_inits_and_terms
+            -Wl,-dead_strip
     )
 endif ()
 
@@ -68,17 +68,14 @@ add_custom_command(
         COMMENT "Placing Python package 'pyradiolib' next to compiled module"
         VERBATIM
 )
-
-#find_package(Python3 COMPONENTS Interpreter QUIET)
-
-#if (Python3_Interpreter_FOUND)
-#    add_custom_command(
-#            TARGET ${MODULE_NAME} POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E env
-#            "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
-#            ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
-#            -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
-#            COMMENT "Generating pyradiolib.pyi with pybind11-stubgen"
-#            VERBATIM
-#    )
-#endif ()
+if (Python3_Interpreter_FOUND)
+    add_custom_command(
+            TARGET ${MODULE_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E env
+            "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
+            ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
+            -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
+            COMMENT "Generating pyradiolib with pybind11-stubgen"
+            VERBATIM
+    )
+endif ()
