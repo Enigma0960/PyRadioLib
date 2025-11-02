@@ -8,7 +8,7 @@ void bind_module(py::module& module) {
 	                      std::uint32_t rst,
 	                      std::uint32_t gpio) {
 		    // исходный C++ ctor
-		    return Module(hal.get(), cs, irq, rst, gpio);
+		    return std::make_shared<Module>(hal.get(), cs, irq, rst, gpio);
 	    }),
 	        py::arg("hal"),
 	        py::arg("cs"),
@@ -17,5 +17,5 @@ void bind_module(py::module& module) {
 	        py::arg("gpio") = RADIOLIB_NC,
 	        py::keep_alive<1, 2>() // 1 = this (Module), 2 = arg "hal"
 	        )
-	    .def("init", &Module::init);
+	    .def("init", &Module::init, py::call_guard<py::gil_scoped_release>());
 }

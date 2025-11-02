@@ -6,6 +6,7 @@
 
 using namespace pyradiolib;
 
+
 TEST(RadioLib, SmokeTest) {
 	Module module(nullptr, 0, 0, 0);
 	UNUSED(module);
@@ -20,4 +21,18 @@ TEST(RadioLib, MokeHal) {
 	ASSERT_EQ(hal.digitalRead(0), 1);
 	hal.digitalWrite(0, 0);
 	ASSERT_EQ(hal.digitalRead(0), 0);
+}
+
+
+TEST(RadioLib, ModuleInit) {
+	auto ctx = std::make_shared<MockContext>();
+	MockHal hal(ctx, 0, 1, 0, 1, 1, 0);
+
+	Module module(&hal, 0, 1, 2);
+
+	module.init();
+
+	ASSERT_EQ(hal.digitalRead(0), 1);
+	ASSERT_EQ(hal.gpio()->getPinMode(0), 1);
+
 }

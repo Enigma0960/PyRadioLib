@@ -9,25 +9,14 @@ target_link_libraries(${MODULE_NAME} PRIVATE
         PyRadioLib::core
         PyRadioLib::mock
 )
-target_include_directories(${MODULE_NAME} PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
+target_include_directories(${MODULE_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin/${MODULE_NAME}")
-
 set_target_properties(${MODULE_NAME} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
         RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
         ARCHIVE_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
-        ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
-        ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
 )
-
 foreach (_cfg IN ITEMS Debug Release RelWithDebInfo MinSizeRel)
     string(TOUPPER "${_cfg}" _CFG)
     set_target_properties(${MODULE_NAME} PROPERTIES
@@ -51,7 +40,6 @@ add_custom_command(
         COMMENT "Placing Python package 'pyradiolib' next to compiled module"
         VERBATIM
 )
-
 
 add_custom_command(
         TARGET ${MODULE_NAME} POST_BUILD
