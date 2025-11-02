@@ -17,8 +17,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 
-find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter Development)
-find_package(pybind11 REQUIRED)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter Development Development.Module)
 
 
 add_subdirectory(src)

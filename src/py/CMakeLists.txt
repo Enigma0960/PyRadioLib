@@ -12,7 +12,7 @@ target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE
 target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE
         PyRadioLib::core
         PyRadioLib::mock
-        PyRadioLib::radiolib
+        radiolib
 )
 target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_INCLUDE_DIRS})
 target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_LIBRARIES})
@@ -21,9 +21,9 @@ pybind11_add_module(${MODULE_NAME} $<TARGET_OBJECTS:${MODULE_BINDINGS_NAME}>)
 target_link_libraries(${MODULE_NAME} PRIVATE
         PyRadioLib::core
         PyRadioLib::mock
-        PyRadioLib::radiolib
+        radiolib
 )
-target_include_directories(${MODULE_NAME} PRIVATE
+target_include_directories(${MODULE_NAME} SYSTEM PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${RADIOLIB_INCLUDE_DIR}
         ${pybind11_INCLUDE_DIR}
@@ -68,14 +68,15 @@ add_custom_command(
         COMMENT "Placing Python package 'pyradiolib' next to compiled module"
         VERBATIM
 )
-if (Python3_Interpreter_FOUND)
-    add_custom_command(
-            TARGET ${MODULE_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E env
-            "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
-            ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
-            -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
-            COMMENT "Generating pyradiolib with pybind11-stubgen"
-            VERBATIM
-    )
-endif ()
+
+#if (Python3_Interpreter_FOUND)
+#    add_custom_command(
+#            TARGET ${MODULE_NAME} POST_BUILD
+#            COMMAND ${CMAKE_COMMAND} -E env
+#            "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
+#            ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
+#            -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
+#            COMMENT "Generating pyradiolib with pybind11-stubgen"
+#            VERBATIM
+#    )
+#endif ()
