@@ -4,30 +4,19 @@ set(MODULE_BINDINGS_NAME "pyradiolib-bindings")
 collect_sources(${CMAKE_CURRENT_SOURCE_DIR} MODULE_SOURCES MODULE_HEADERS)
 
 add_library(${MODULE_BINDINGS_NAME} OBJECT ${MODULE_SOURCES} ${MODULE_HEADERS})
-target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${RADIOLIB_INCLUDE_DIR}
-        ${pybind11_INCLUDE_DIR}
+target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE
+        radiolib
         PyRadioLib::core
         PyRadioLib::mock
-        radiolib
 )
+target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE pybind11::module)
+
 target_include_directories(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_INCLUDE_DIRS})
 target_link_libraries(${MODULE_BINDINGS_NAME} PRIVATE ${Python3_LIBRARIES})
 
 pybind11_add_module(${MODULE_NAME} $<TARGET_OBJECTS:${MODULE_BINDINGS_NAME}>)
-target_link_libraries(${MODULE_NAME} PRIVATE
-        PyRadioLib::core
-        PyRadioLib::mock
-        radiolib
-)
-target_include_directories(${MODULE_NAME} SYSTEM PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${RADIOLIB_INCLUDE_DIR}
-        ${pybind11_INCLUDE_DIR}
-)
 
 if (APPLE)
     target_link_options(${MODULE_NAME} PRIVATE
@@ -69,14 +58,12 @@ add_custom_command(
         VERBATIM
 )
 
-#if (Python3_Interpreter_FOUND)
-#    add_custom_command(
-#            TARGET ${MODULE_NAME} POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E env
-#            "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
-#            ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
-#            -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
-#            COMMENT "Generating pyradiolib with pybind11-stubgen"
-#            VERBATIM
-#    )
-#endif ()
+add_custom_command(
+        TARGET ${MODULE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E env
+        "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
+        ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
+        -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
+        COMMENT "Generating pyradiolib with pybind11-stubgen"
+        VERBATIM
+)
