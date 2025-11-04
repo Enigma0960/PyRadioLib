@@ -1,7 +1,9 @@
 #pragma once
 
+
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-void bind_module(py::module& module);
+void bind_sx1262(py::module& module);
+

@@ -6,5 +6,11 @@ try:
 except ImportError as exc:
     raise ImportError("pyradiolib extension is not built or not found") from exc
 
-globals().update({k: v for k, v in _ext.__dict__.items() if not k.startswith("_")})
+import sys as _sys
+
+_sys.modules[__name__] = _ext
+
+modules = _ext.modules
+_sys.modules[__name__ + ".modules"] = modules
+
 del _ext
