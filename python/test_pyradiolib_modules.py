@@ -7,7 +7,7 @@ from pyradiolib.modules import SX1262
 
 
 class TestPyRadioLibModules:
-    def test_base(self, hal):
+    def test_sx1262_begin(self, hal):
         module = pyradiolib.Module(hal, 1, 255, 255)
         assert module is not None
 
@@ -19,4 +19,4 @@ class TestPyRadioLibModules:
         except Exception as e:
             pytest.fail(f"SX1262.begin() raised {e}")
 
-        pytest.exit(f'Call results: \n{pprint.pformat(hal.agg.mock_calls)}')
+        # pytest.(f'Call results: \n{pprint.pformat(hal.agg.mock_calls)}')
