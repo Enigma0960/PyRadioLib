@@ -1,11 +1,11 @@
 #include "bind_sx1262.h"
 
-#include <py/modules/bind_enums.h>
+#include <py/bind_types.h>
 #include <radiolib/modules/SX126x/SX1262.h>
 
 void bind_sx1262(py::module& module) {
 	py::class_<SX1262, std::shared_ptr<SX1262>>(module, "SX1262")
-	    .def(py::init([](std::shared_ptr<Module> module) {
+	    .def(py::init([](std::shared_ptr<Module> const& module) {
 		    return std::make_shared<SX1262>(module.get());
 	    }),
 	        py::arg("module"),

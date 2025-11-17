@@ -19,4 +19,4 @@ class TestPyRadioLibModules:
         except Exception as e:
             pytest.fail(f"SX1262.begin() raised {e}")
 
-        # pytest.(f'Call results: \n{pprint.pformat(hal.agg.mock_calls)}')
+        pytest.exit(f'Call results: \n{pprint.pformat(hal.agg.mock_calls)}')
