@@ -4,7 +4,7 @@
 #include <radiolib/modules/SX126x/SX126x.h>
 
 void bind_sx126x(py::module& module) {
-	py::class_<SX126x, std::shared_ptr<SX126x>>(module, "SX126x")
+	py::class_<SX126x, PhysicalLayer, std::shared_ptr<SX126x>>(module, "SX126x")
 	    .def(py::init([](std::shared_ptr<Module> module) {
 		    return std::make_shared<SX126x>(module.get());
 	    }),

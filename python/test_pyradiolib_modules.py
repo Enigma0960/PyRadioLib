@@ -11,7 +11,7 @@ from pyradiolib.modules import (
 )
 from python.conftest import PyMockHal
 
-RADIO_PARAMS = {
+RADIO_POWER_PARAMS = {
     "sx1261": dict(cls=SX1261,
                    min_power=-17, max_power=15,
                    min_clipped_power=-17, max_clipped_power=15,
@@ -83,20 +83,79 @@ def check_output_power(
         assert _power == clipped
 
 
-@pytest.fixture(params=RADIO_PARAMS.values(), ids=RADIO_PARAMS.keys())
-def radio_case(request, module: pyradiolib.Module):
-    p = request.param
-    radio = p["cls"](module)
+@pytest.fixture(
+    params=RADIO_POWER_PARAMS.values(),
+    ids=RADIO_POWER_PARAMS.keys(),
+)
+def radio_power_case(request, module: pyradiolib.Module):
+    param = request.param
+    radio = param["cls"](module)
     assert radio is not None
-    return radio, p
+    return radio, param
 
 
-class TestSx1261:
-    # def test_begin(self, radio_case):
-    #     radio, param = radio_case
+RADIO_BEGIN_PARAMS = {
+    "sx1262": dict(cls=SX1262, ),
+    "sx1268": dict(cls=SX1268, ),
+}
 
-    def test_set_output_power(self, radio_case, hal: PyMockHal):
-        radio, param = radio_case
+
+@pytest.fixture(
+    params=RADIO_BEGIN_PARAMS.values(),
+    ids=RADIO_BEGIN_PARAMS.keys(),
+)
+def radio_begin_case(request, module: pyradiolib.Module):
+    param = request.param
+    radio = param["cls"](module)
+    assert radio is not None
+    return radio, param
+
+
+class TestSx126x:
+    def test_begin(self, radio_begin_case, hal: PyMockHal):
+        radio, param = radio_begin_case
+
+        radio.begin(
+            freq=434.0,
+            bw=125.0,
+            sf=9,
+            cr=7,
+            syncWord=18,
+            power=10,
+            preambleLength=8,
+            tcxoVoltage=1.6,
+            useRegulatorLDO=False
+        )
+
+    def test_begin_fsk(self, radio_begin_case, hal: PyMockHal):
+        radio, param = radio_begin_case
+
+        radio.beginFSK(
+            freq=434.0,
+            br=4.0,
+            freqDev=5.0,
+            rxBw=156.2,
+            power=10,
+            preambleLength=16,
+            tcxoVoltage=1.6,
+            useRegulatorLDO=False,
+        )
+
+    def test_begin_lrfhss(self, radio_begin_case, hal: PyMockHal):
+        radio, param = radio_begin_case
+
+        radio.beginLRFHSS(
+            freq=434.0,
+            bw=6,
+            cr=1,
+            narrowGrid=True,
+            power=10,
+            tcxoVoltage=1.6,
+            useRegulatorLDO=False,
+        )
+
+    def test_set_output_power(self, radio_power_case, hal: PyMockHal):
+        radio, param = radio_power_case
         set_power(
             hal=hal,
             radio=radio,
@@ -106,8 +165,8 @@ class TestSx1261:
             max_test_power=param["max_test_power"],
         )
 
-    def test_check_output_power(self, radio_case):
-        radio, param = radio_case
+    def test_check_output_power(self, radio_power_case):
+        radio, param = radio_power_case
         check_output_power(
             radio=radio,
             min_power=param["min_power"],
@@ -115,82 +174,3 @@ class TestSx1261:
             min_test_power=param["min_test_power"],
             max_test_power=param["max_test_power"],
         )
-
-# def set_power(radio: SX1261 | SX1262 | SX1268 | SX126x, hal: PyMockHal, min_power: int, max_power: int):
-#     for power in range(min_power, max_power):
-#         res = radio.setOutputPower(power)
-#
-#         assert res == 0
-#
-#         assert len(hal.agg.mock_calls) >= 22
-#
-#         assert hal.agg.mock_calls[22][0] == "spiTransfer"
-#         assert hal.agg.mock_calls[22][1] == (power if power >= 0 else 256 + power, 2, 0)
-#
-#         hal.agg.mock_calls.clear()
-
-# class TestPyRadioLibModules:
-#     def test_sx1262_begin(self, hal: PyMockHal, module: PyMockHal):
-#         radio = SX1262(module)
-#         assert radio is not None
-#
-#         try:
-#             radio.begin()
-#         except Exception as e:
-#             pytest.fail(f"SX1262.begin() raised {e}")
-#
-#         # pytest.exit(f'Call results: \n{pprint.pformat(hal.agg.mock_calls)}')
-#
-#
-# class TestSx1261:
-#     def test_begin(self, module):
-#         radio = SX1261(module)
-#         assert radio is not None
-#
-#     def test_set_output_power(self, hal: PyMockHal, module: pyradiolib.Module):
-#         radio = SX1261(module)
-#
-#         set_power(radio, hal, -17, 15)
-#
-#     def test_check_output_power(self, hal: PyMockHal, module: pyradiolib.Module):
-#         radio = SX1261(module)
-#
-#         for power in range(-17, 15):
-#             res, clipped = radio.checkOutputPower(power)
-#             assert res == 0
-#             assert power == clipped
-#
-#         res, clipped = radio.checkOutputPower(-20)
-#         assert clipped == -17
-#
-#         res, clipped = radio.checkOutputPower(20)
-#         assert clipped == 15
-#
-#
-# class TestSx1262:
-#     pass
-#
-#
-# class TestSx1268:
-#     def test_begin(self, module):
-#         radio = SX1268(module)
-#         assert radio is not None
-#
-#     def test_set_output_power(self, hal: PyMockHal, module: pyradiolib.Module):
-#         radio = SX1268(module)
-#
-#         set_power(radio, hal, -9, 22)
-#
-#     def test_check_output_power(self, hal: PyMockHal, module: pyradiolib.Module):
-#         radio = SX1268(module)
-#
-#         for power in range(-9, 22):
-#             res, clipped = radio.checkOutputPower(power)
-#             assert res == 0
-#             assert power == clipped
-#
-#         res, clipped = radio.checkOutputPower(-20)
-#         assert clipped == -9
-#
-#         res, clipped = radio.checkOutputPower(20)
-#         assert clipped == 20
