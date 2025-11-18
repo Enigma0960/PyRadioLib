@@ -4,7 +4,7 @@ import pytest
 
 from unittest.mock import MagicMock
 
-from pyradiolib import RadioLibHal
+from pyradiolib import RadioLibHal, Module
 
 
 class PyMockHal(RadioLibHal):
@@ -89,3 +89,8 @@ class PyMockHal(RadioLibHal):
 @pytest.fixture
 def hal():
     return PyMockHal(0, 1, 0, 1, 1, 0)
+
+
+@pytest.fixture
+def module(hal):
+    return Module(hal, 1, 255, 255)

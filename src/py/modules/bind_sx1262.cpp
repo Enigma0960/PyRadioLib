@@ -2,9 +2,10 @@
 
 #include <py/bind_types.h>
 #include <radiolib/modules/SX126x/SX1262.h>
+#include <radiolib/modules/SX126x/SX126x.h>
 
 void bind_sx1262(py::module& module) {
-	py::class_<SX1262, std::shared_ptr<SX1262>>(module, "SX1262")
+	py::class_<SX1262, SX126x, std::shared_ptr<SX1262>>(module, "SX1262")
 	    .def(py::init([](std::shared_ptr<Module> const& module) {
 		    return std::make_shared<SX1262>(module.get());
 	    }),
@@ -45,9 +46,15 @@ void bind_sx1262(py::module& module) {
 	        py::arg("skipCalibration"))
 	    .def("setOutputPower", &SX1262::setOutputPower,
 	        py::arg("power"))
-	    .def("checkOutputPower", &SX1262::checkOutputPower,
-	        py::arg("power"),
-	        py::arg("clipped"))
-	    .def("setModem", py::overload_cast<ModemType>(&SX1262::setModem),
-	        py::arg("modem"));
+	    .def("checkOutputPower", [](SX1262& self, std::int8_t power) {
+		    std::int8_t clipped = 0;
+		    std::int16_t result = 0;
+		    {
+			    py::gil_scoped_release release;
+			    result = self.checkOutputPower(power, &clipped);
+		    }
+		    return py::make_tuple(result, clipped); //
+	    },
+	        py::arg("power"))
+	    .def("setModem", py::overload_cast<ModemType>(&SX1262::setModem), py::arg("modem"));
 }
