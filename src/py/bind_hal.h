@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
 #include <radiolib/Hal.h>
 
 namespace py = pybind11;
@@ -59,7 +60,25 @@ struct PyHal : public RadioLibHal {
 	}
 
 	void spiTransfer(uint8_t* out, size_t len, uint8_t* in) override {
-		PYBIND11_OVERRIDE_PURE(void, RadioLibHal, spiTransfer, out, len, in);
+		py::gil_scoped_acquire const gil;
+
+		py::function const override = pybind11::get_override(static_cast<RadioLibHal const*>(this), "spiTransfer");
+		if (!override) {
+			PyErr_SetString(PyExc_TypeError, "Pure virtual function 'RadioLibHal.spiTransfer' not overridden in Python");
+			throw py::error_already_set();
+		}
+
+		py::bytes out_bytes(reinterpret_cast<char const*>(out), len);
+
+		py::object result = override(out_bytes);
+
+		if (!result.is_none()) {
+			py::bytes in_bytes = result.cast<py::bytes>();
+			std::string in_str = in_bytes;
+
+			std::size_t const copy_len = std::min(len, in_str.size());
+			std::memcpy(in, in_str.data(), copy_len);
+		}
 	}
 
 	void spiEndTransaction() override {
@@ -71,7 +90,7 @@ struct PyHal : public RadioLibHal {
 	}
 
 	uint32_t pinToInterrupt(uint32_t pin) override {
-		PYBIND11_OVERRIDE_PURE(uint32_t, RadioLibHal, pinToInterrupt, pin );
+		PYBIND11_OVERRIDE_PURE(uint32_t, RadioLibHal, pinToInterrupt, pin);
 	}
 };
 

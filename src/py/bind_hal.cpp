@@ -39,7 +39,27 @@ void bind_hal(py::module_& module) {
 	    .def("pulseIn", &RadioLibHal::pulseIn, py::arg("pin"), py::arg("state"), py::arg("timeout"))
 	    .def("spiBegin", &RadioLibHal::spiBegin)
 	    .def("spiBeginTransaction", &RadioLibHal::spiBeginTransaction)
-	    .def("spiTransfer", &RadioLibHal::spiTransfer)
+	    .def("spiTransfer", [](RadioLibHal& self, py::bytes out) {
+		    std::string outData = out;
+		    std::size_t const len = outData.size();
+
+		    std::vector<std::uint8_t> tx(len);
+		    std::memcpy(tx.data(), outData.data(), len);
+
+		    std::vector<std::uint8_t> rx(len);
+
+		    {
+			    py::gil_scoped_release const release;
+			    self.spiTransfer(tx.data(), len, rx.data());
+		    }
+
+		    py::bytes const inData(
+		        reinterpret_cast<char const*>(rx.data()),
+		        rx.size());
+
+		    return inData; //
+	    },
+	        py::arg("out"))
 	    .def("spiEndTransaction", &RadioLibHal::spiEndTransaction)
 	    .def("spiEnd", &RadioLibHal::spiEnd);
 

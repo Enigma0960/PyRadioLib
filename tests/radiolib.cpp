@@ -46,10 +46,8 @@ TEST(RadioLib, Sx1261) {
 	Module module(&hal, 0, 1, 2);
 
 	auto* radio = new SX1261(&module);
+	auto status = radio->begin();
 
-	int8_t c = 0;
+	ASSERT_EQ(status, 0);
 
-	radio->checkOutputPower(10, &c);
-
-	ASSERT_EQ(c, 10);
 }
