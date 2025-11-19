@@ -11,4 +11,9 @@ def hal():
 
 @pytest.fixture
 def module(hal):
-    return Module(hal, 10, 11, 12)
+    hal.set_pin_name(10, 'ch')
+    hal.set_pin_name(11, 'irq')
+    hal.set_pin_name(12, 'rst')
+
+
+    return Module(hal, 10, 0xffffffff, 12)

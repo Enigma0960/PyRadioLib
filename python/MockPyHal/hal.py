@@ -1,28 +1,94 @@
-from typing import Callable
+import logging
+from enum import IntEnum
+from typing import Callable, Dict, Tuple, Optional, Union, Any, List
 from pyradiolib import RadioLibHal
-from pyradiolib import MockHal
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, _Call
+
+from python.MockPyHal.sx126x import MockSX126x
+
+_LOGGER = logging.getLogger(__name__)
+
+
+class PinMode(IntEnum):
+    Input = 0
+    Output = 1
+    Disable = 255
+
+
+class PinType(IntEnum):
+    Digital = 0
+    Analog = 1
+    Pwm = 2
+
+
+class PinInfo:
+    name: str = ""
+    mode: PinMode = PinMode.Input
+    type: PinType = PinType.Digital
+    value: Tuple[int, float] = 0
 
 
 class PyMockHal(RadioLibHal):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._agg = MagicMock(name='hal')
+        self._agg: MagicMock = MagicMock(name='hal')
+        self._millis: int = 0
+        self._modem_type: Optional[str] = None
+        self._modem: Optional[Any] = None
 
-        self._millis = 0
+        self._pins_map: Dict[int, PinInfo] = {}
 
     @property
     def agg(self) -> MagicMock:
         return self._agg
 
+    def set_pin_name(self, pin: int, name: str) -> None:
+        if pin == 0xffffffff:
+            return
+        if pin not in self._pins_map:
+            self._pins_map[pin] = PinInfo()
+        self._pins_map[pin].name = name
+
+    def set_modem_type(self, modem_type: str) -> None:
+        self._modem_type = modem_type
+
+        modems = {
+            "sx1261": MockSX126x,
+        }
+
+        if modem_type in modems.keys():
+            self._modem = modems[modem_type](type=modem_type)
+
     def pinMode(self, pin: int, mode: int) -> None:
+        if pin == 0xffffffff:
+            return
+
+        if pin not in self._pins_map:
+            self._pins_map[pin] = PinInfo()
+
+        self._pins_map[pin].mode = PinMode(mode)
+
         self._agg.pinMode(pin, mode)
 
     def digitalWrite(self, pin: int, value: int) -> None:
+        if pin == 0xffffffff:
+            return
+
+        if pin not in self._pins_map:
+            self._pins_map[pin] = PinInfo()
+        self._pins_map[pin].value = value
+
         self._agg.digitalWrite(pin, value)
 
     def digitalRead(self, pin: int) -> int:
+        if pin == 0xffffffff:
+            return 0
+
+        if pin not in self._pins_map:
+            self._pins_map[pin] = PinInfo()
+        self._agg.digitalRead.return_value = self._pins_map[pin].value
+
         return self._agg.digitalRead(pin)
 
     def attachInterrupt(self, interruptNum: int, interruptCb: Callable, mode: int) -> None:
@@ -40,10 +106,11 @@ class PyMockHal(RadioLibHal):
         self._millis += int(us // 1000)
 
     def millis(self) -> int:
-        self._agg.millis()
-        return self._millis
+        self.agg.millis.return_value = self._millis
+        return self._agg.millis()
 
     def micros(self) -> int:
+        self.agg.micros.return_value = self._millis * 1000
         return self._agg.micros()
 
     def pulseIn(self, pin: int, state: int, timeout: int) -> int:
@@ -56,7 +123,16 @@ class PyMockHal(RadioLibHal):
         self._agg.spiBeginTransaction()
 
     def spiTransfer(self, out: bytes):
+        # out_hex = " ".join(["{:02x}".format(x) for x in out])
+        # _LOGGER.debug(f"SPI transmit: {out_hex}")
+
+        if self._modem_type is not None:
+            data = self._spi_parser(out)
+            if data is not None:
+                self._agg.spiTransfer.return_value = data
+
         result = self._agg.spiTransfer(out)
+
         if type(result) is bytes:
             return result
         else:
@@ -85,3 +161,34 @@ class PyMockHal(RadioLibHal):
 
     def pinToInterrupt(self, pin) -> int:
         return self._agg.pinToInterrupt(pin)
+
+    def _spi_parser(self, data: bytes) -> Optional[bytes]:
+        if self._modem_type is None:
+            return None
+
+        call = {
+            "sx1261": self._spi_parser_sx126x,
+            "sx1262": self._spi_parser_sx126x,
+            "sx1268": self._spi_parser_sx126x,
+        }
+
+        if self._modem_type in call.keys():
+            return call[self._modem_type](data)
+
+        return None
+
+    def _spi_parser_sx126x(self, data: bytes) -> Optional[bytes]:
+        if self._modem is None:
+            return None
+
+        data_len = len(data)
+
+
+        op_code: int = data[0]
+        data = data[1:]
+        payload: Union[bytes, int] = data[0] if len(data) == 1 else data
+
+        if op_code in self._modem.commands.keys():
+            return self._modem.commands[op_code](payload=payload, len_=data_len)
+
+        return None

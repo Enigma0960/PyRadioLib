@@ -20,9 +20,11 @@ RADIO_PARAMETERS = {
     params=RADIO_PARAMETERS.values(),
     ids=RADIO_PARAMETERS.keys(),
 )
-def make_radio(request, module: pyradiolib.Module, hal: PyMockHal):
+def make_radio(request: pytest.FixtureRequest, module: pyradiolib.Module, hal: PyMockHal):
+    hal.set_modem_type(request.node.callspec.id)
     radio = request.param["cls"](module)
     assert radio is not None
+
 
     if request.param["cls"] == SX1261:
         status = radio.begin(
@@ -45,7 +47,7 @@ def make_radio(request, module: pyradiolib.Module, hal: PyMockHal):
             useRegulatorLDO=False
         )
 
-    # print(hal.agg.mock_calls)
+    print(hal.agg.mock_calls)
 
     assert status == 0
 
