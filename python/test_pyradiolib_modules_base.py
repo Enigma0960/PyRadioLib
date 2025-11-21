@@ -55,17 +55,13 @@ def make_radio(request: pytest.FixtureRequest, module: pyradiolib.Module, hal: P
 
 
 class TestSx126xBase:
-    def test_auto_ldro(self, make_radio, hal: PyMockHal):
+    def test_scan_channel(self, make_radio, hal: PyMockHal):
         radio, param = make_radio
-
-        if not issubclass(type(radio), SX126x):
-            pytest.fail("Radio is not base SX126x")
-
         radio: SX126x
 
         try:
-            status = radio.autoLDRO()
+            status = radio.scanChannel()
         except Exception as e:
-            pytest.fail(f"autoLDO() raised {e.__class__.__name__}: {e}")
+            pytest.fail(f"scanChannel() raised {e.__class__.__name__}: {e}")
 
-        assert status == 0
+        assert ModuleStatus(status) in (ModuleStatus.LoraDetected, ModuleStatus.ChannelFree)

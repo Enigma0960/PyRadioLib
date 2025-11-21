@@ -25,12 +25,16 @@ void bind_hal(py::module_& module) {
 	    .def("pinMode", &RadioLibHal::pinMode, py::arg("pin"), py::arg("mode"))
 	    .def("digitalWrite", &RadioLibHal::digitalWrite, py::arg("pin"), py::arg("value"))
 	    .def("digitalRead", &RadioLibHal::digitalRead, py::arg("pin"))
-	    .def("attachInterrupt", [](RadioLibHal& self, uint32_t num, std::function<void()> const& cb, uint32_t mode) {
-		    // если это чисто виртуальный метод, тут обычно бросают исключение:
-		    //throw std::runtime_error("attachInterrupt is only meaningful in concrete HAL implementations");
-	    }, //
+	    .def("attachInterrupt", [](RadioLibHal& self, uint32_t interruptNum, py::function callback, uint32_t mode = 0) {
+		    auto* py_hal = dynamic_cast<PyHal*>(&self);
+		    if (!py_hal) {
+			    throw std::runtime_error(
+			        "attachInterrupt: underlying HAL is not PyHal, cannot register Python callback");
+		    }
+		    py_hal->registerInterrupt(interruptNum, std::move(callback), mode); //
+	    },
 	        py::arg("interruptNum"), py::arg("callback"), py::arg("mode"), //
-	        R"(Для Python-наследников реализуйте attachInterrupt в своём классе.)")
+	        R"(Назначить Python-функцию как обработчик "прерывания" для данного interruptNum на данном экземпляре HAL.)")
 	    .def("detachInterrupt", &RadioLibHal::detachInterrupt, py::arg("interruptNum"))
 	    .def("delay", &RadioLibHal::delay, py::arg("ms"))
 	    .def("delayMicroseconds", &RadioLibHal::delayMicroseconds, py::arg("us"))
@@ -61,7 +65,19 @@ void bind_hal(py::module_& module) {
 	    },
 	        py::arg("out"))
 	    .def("spiEndTransaction", &RadioLibHal::spiEndTransaction)
-	    .def("spiEnd", &RadioLibHal::spiEnd);
+	    .def("spiEnd", &RadioLibHal::spiEnd)
+	    .def("triggerInterrupt", [](RadioLibHal& self, uint32_t interruptNum) {
+		    auto* py_hal = dynamic_cast<PyHal*>(&self);
+		    if (!py_hal) {
+			    throw std::runtime_error(
+			        "triggerInterrupt: underlying HAL is not PyHal");
+		    }
+		    py_hal->triggerInterrupt(interruptNum); //
+	    },
+	        py::arg("interruptNum"), //
+	        R"(Вызвать зарегистрированный Python-обработчик для данного interruptNum на данном экземпляре HAL. Полезно в mock-тестах для имитации прерывания.)");
+
+	;
 
 #if defined(__unix__) || defined(linux)
 	py::class_<PiHal, RadioLibHal, std::shared_ptr<PiHal>>(module, "PiHal")

@@ -24,11 +24,22 @@ struct PyHal : public RadioLibHal {
 	}
 
 	void attachInterrupt(uint32_t interruptNum, void (*interruptCb)(void), uint32_t mode) override {
-		// PYBIND11_OVERRIDE_PURE(void, RadioLibHal, attachInterrupt, interruptNum, interruptCb, mode);
+		py::gil_scoped_acquire const gil;
+
+		py::function override = py::get_override(static_cast<RadioLibHal const*>(this), "attachInterrupt");
+		if (override) {
+			py::capsule cbCapsule(reinterpret_cast<void*>(interruptCb), "radiolib_interrupt_cb");
+			override(interruptNum, cbCapsule, mode);
+		}
 	}
 
 	void detachInterrupt(uint32_t interruptNum) override {
-		PYBIND11_OVERRIDE_PURE(void, RadioLibHal, detachInterrupt, interruptNum);
+		py::gil_scoped_acquire const gil;
+		if (_irq_handlers.count(interruptNum) > 0) {
+			if (auto it = _irq_handlers.find(interruptNum); it != _irq_handlers.end()) {
+				_irq_handlers.erase(it);
+			}
+		}
 	}
 
 	void delay(RadioLibTime_t ms) override {
@@ -92,6 +103,29 @@ struct PyHal : public RadioLibHal {
 	uint32_t pinToInterrupt(uint32_t pin) override {
 		PYBIND11_OVERRIDE_PURE(uint32_t, RadioLibHal, pinToInterrupt, pin);
 	}
+
+public:
+	void registerInterrupt(uint32_t interruptNum, py::function callback, uint32_t mode = 0) {
+		py::gil_scoped_acquire gil;
+		_irq_handlers[interruptNum] = std::move(callback);
+	}
+
+	void triggerInterrupt(uint32_t interruptNum) {
+		py::gil_scoped_acquire gil;
+
+		auto it = _irq_handlers.find(interruptNum);
+		if (it == _irq_handlers.end() || it->second.is_none()) {
+			return;
+		}
+		try {
+			it->second();
+		} catch (py::error_already_set& e) {
+			PyErr_WriteUnraisable(e.value().ptr());
+		}
+	}
+
+private:
+	std::unordered_map<uint32_t, py::function> _irq_handlers;
 };
 
 void bind_hal(py::module_& module);

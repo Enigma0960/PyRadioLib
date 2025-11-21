@@ -2,35 +2,6 @@
 
 #include <pybind11/native_enum.h>
 
-enum ModuleStatus : std::int16_t {
-	Normal = RADIOLIB_ERR_NONE,
-	Unknown = RADIOLIB_ERR_UNKNOWN,
-	ChipNotFound = RADIOLIB_ERR_CHIP_NOT_FOUND,
-	MemoryAllocationFailed = RADIOLIB_ERR_MEMORY_ALLOCATION_FAILED,
-	PacketTooLong = RADIOLIB_ERR_PACKET_TOO_LONG,
-	TxTimeout = RADIOLIB_ERR_TX_TIMEOUT,
-	RxTimeout = RADIOLIB_ERR_RX_TIMEOUT,
-	CrcMismatch = RADIOLIB_ERR_CRC_MISMATCH,
-	InvalidBandwidth = RADIOLIB_ERR_INVALID_BANDWIDTH,
-	InvalidSpreadingFactor = RADIOLIB_ERR_INVALID_SPREADING_FACTOR,
-	InvalidCodingRate = RADIOLIB_ERR_INVALID_CODING_RATE,
-	InvalidBitRange = RADIOLIB_ERR_INVALID_BIT_RANGE,
-	InvalidFrequency = RADIOLIB_ERR_INVALID_FREQUENCY,
-	InvalidOutputPower = RADIOLIB_ERR_INVALID_OUTPUT_POWER,
-	PreambleDetected = RADIOLIB_PREAMBLE_DETECTED,
-	ChannelFree = RADIOLIB_CHANNEL_FREE,
-	SpiWriteFailed = RADIOLIB_ERR_SPI_WRITE_FAILED,
-	InvalidCurrentLimit = RADIOLIB_ERR_INVALID_CURRENT_LIMIT,
-	InvalidPreambleLength = RADIOLIB_ERR_INVALID_PREAMBLE_LENGTH,
-	InvalidGain = RADIOLIB_ERR_INVALID_GAIN,
-	WrongModem = RADIOLIB_ERR_WRONG_MODEM,
-	InvalidNumSamples = RADIOLIB_ERR_INVALID_NUM_SAMPLES,
-	InvalidRssiOffset = RADIOLIB_ERR_INVALID_RSSI_OFFSET,
-	InvalidEncoding = RADIOLIB_ERR_INVALID_ENCODING,
-	LoraHeaderDamaged = RADIOLIB_ERR_LORA_HEADER_DAMAGED,
-	Unsupported = RADIOLIB_ERR_UNSUPPORTED,
-	InvalidDioPin = RADIOLIB_ERR_INVALID_DIO_PIN,
-};
 
 void bind_types(py::module& module) {
 	py::enum_<ModemType>(module, "ModemType", py::arithmetic())
@@ -136,6 +107,73 @@ void bind_types(py::module& module) {
 	    .value("LoraHeaderDamaged", LoraHeaderDamaged)
 	    .value("Unsupported", Unsupported)
 	    .value("InvalidDioPin", InvalidDioPin)
+	    .value("InvalidRssiThreshold", InvalidRssiThreshold)
+	    .value("NullPointer", NullPointer)
+	    .value("InvalidIrq", InvalidIrq)
+	    .value("PacketTooShort", PacketTooShort)
+	    .value("InvalidBitRate", InvalidBitRate)
+	    .value("InvalidFrequencyDeviation", InvalidFrequencyDeviation)
+	    .value("InvalidBitRateBwRatio", InvalidBitRateBwRatio)
+	    .value("InvalidRxBandwidth", InvalidRxBandwidth)
+	    .value("InvalidSyncWord", InvalidSyncWord)
+	    .value("InvalidDataShaping", InvalidDataShaping)
+	    .value("InvalidModulation", InvalidModulation)
+	    .value("InvalidOokRssiPeakType", InvalidOokRssiPeakType)
+	    .value("InvalidBitRateToleranceValue", InvalidBitRateToleranceValue)
+	    .value("InvalidSymbol", InvalidSymbol)
+	    .value("InvalidMicETelemetry", InvalidMicETelemetry)
+	    .value("InvalidMicETelemetryLength", InvalidMicETelemetryLength)
+	    .value("MicETelemetryStatus", MicETelemetryStatus)
+	    .value("InvalidSsdvMode", InvalidSsdvMode)
+	    .value("InvalidImageSize", InvalidImageSize)
+	    .value("InvalidImageQuality", InvalidImageQuality)
+	    .value("InvalidSubsampling", InvalidSubsampling)
+	    .value("InvalidRttyShift", InvalidRttyShift)
+	    .value("UnsupportedEncoding", UnsupportedEncoding)
+	    .value("InvalidDataRate", InvalidDataRate)
+	    .value("InvalidAddressWidth", InvalidAddressWidth)
+	    .value("InvalidPipeNumber", InvalidPipeNumber)
+	    .value("AckNotReceived", AckNotReceived)
+	    .value("InvalidNumBroadAddrs", InvalidNumBroadAddrs)
+	    .value("InvalidCrcConfiguration", InvalidCrcConfiguration)
+	    .value("LoraDetected", LoraDetected)
+	    .value("InvalidTcxoVoltage", InvalidTcxoVoltage)
+	    .value("InvalidModulationParameters", InvalidModulationParameters)
+	    .value("SpiCmdTimeout", SpiCmdTimeout)
+	    .value("SpiCmdInvalid", SpiCmdInvalid)
+	    .value("SpiCmdFailed", SpiCmdFailed)
+	    .value("InvalidSleepPeriod", InvalidSleepPeriod)
+	    .value("InvalidRxPeriod", InvalidRxPeriod)
+	    .value("InvalidCallsign", InvalidCallsign)
+	    .value("InvalidNumRepeaters", InvalidNumRepeaters)
+	    .value("InvalidRepeaterCallsign", InvalidRepeaterCallsign)
+	    .value("RangingTimeout", RangingTimeout)
+	    .value("InvalidPayload", InvalidPayload)
+	    .value("AddressNotFound", AddressNotFound)
+	    .value("InvalidFunction", InvalidFunction)
+	    .value("NetworkNotJoined", NetworkNotJoined)
+	    .value("DownlinkMalformed", DownlinkMalformed)
+	    .value("InvalidRevision", InvalidRevision)
+	    .value("InvalidPort", InvalidPort)
+	    .value("NoRxWindow", NoRxWindow)
+	    .value("NoChannelAvailable", NoChannelAvailable)
+	    .value("InvalidCid", InvalidCid)
+	    .value("UplinkUnavailable", UplinkUnavailable)
+	    .value("CommandQueueFull", CommandQueueFull)
+	    .value("CommandQueueItemNotFound", CommandQueueItemNotFound)
+	    .value("ErrJoinNonceInvalid", ErrJoinNonceInvalid)
+	    .value("ErrMicMismatch", ErrMicMismatch)
+	    .value("ErrMulticastFcntInvalid", ErrMulticastFcntInvalid)
+	    .value("ErrDwellTimeExceeded", ErrDwellTimeExceeded)
+	    .value("ErrChecksumMismatch", ErrChecksumMismatch)
+	    .value("ErrNoJoinAccept", ErrNoJoinAccept)
+	    .value("LorawanSessionRestored", LorawanSessionRestored)
+	    .value("LorawanNewSession", LorawanNewSession)
+	    .value("NoncesDiscarded", NoncesDiscarded)
+	    .value("SessionDiscarded", SessionDiscarded)
+	    .value("InvalidMode", InvalidMode)
+	    .value("InvalidWifiType", InvalidWifiType)
+	    .value("GnssSubframeNotAvailable", GnssSubframeNotAvailable)
 	    .export_values()
 	    .finalize();
 }

@@ -200,7 +200,7 @@ class MockSX126x(MockModule):
         pass
 
     def _cmd_set_cad(self, data: bytes):
-        pass
+        self._push(b"\x00")
 
     def _cmd_set_tx_continuous_wave(self, data: bytes):
         pass

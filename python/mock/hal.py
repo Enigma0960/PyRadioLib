@@ -52,6 +52,13 @@ class PyMockHal(RadioLibHal):
             self._pins_map[pin] = PinInfo()
         self._pins_map[pin].name = name
 
+    def set_pin_value(self, pin: int, value: Union[int, float]) -> None:
+        if pin == 0xffffffff:
+            return
+        if pin not in self._pins_map:
+            self._pins_map[pin] = PinInfo()
+        self._pins_map[pin].value = value
+
     def set_modem_type(self, modem_type: str) -> None:
         self._modem_type = modem_type
 
@@ -87,7 +94,7 @@ class PyMockHal(RadioLibHal):
 
 
     def digitalRead(self, pin: int) -> int:
-        if pin == 0xffffffff:
+        if pin == 0xffffffff or pin == 255:
             return 0
 
         if pin not in self._pins_map:
