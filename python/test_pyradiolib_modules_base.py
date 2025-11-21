@@ -8,6 +8,7 @@ from pyradiolib.modules import (
     SX1268,
     SX126x,
 )
+from pyradiolib import ModuleStatus
 
 RADIO_PARAMETERS = {
     "sx1261": dict(cls=SX1261, ),
@@ -24,7 +25,6 @@ def make_radio(request: pytest.FixtureRequest, module: pyradiolib.Module, hal: P
     hal.set_modem_type(request.node.callspec.id)
     radio = request.param["cls"](module)
     assert radio is not None
-
 
     if request.param["cls"] == SX1261:
         status = radio.begin(
@@ -49,7 +49,7 @@ def make_radio(request: pytest.FixtureRequest, module: pyradiolib.Module, hal: P
 
     print(hal.agg.mock_calls)
 
-    assert status == 0
+    assert ModuleStatus(status) == ModuleStatus.Normal
 
     return radio, request.param
 

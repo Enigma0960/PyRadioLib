@@ -1,7 +1,7 @@
 import pytest
 
 from pyradiolib import Module
-from python.MockPyHal.hal import PyMockHal
+from python.mock.hal import PyMockHal
 
 
 @pytest.fixture

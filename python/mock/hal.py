@@ -1,10 +1,12 @@
 import logging
+import time
 from enum import IntEnum
 from typing import Callable, Dict, Tuple, Optional, Union, Any, List
 from pyradiolib import RadioLibHal
 from unittest.mock import MagicMock, _Call
 
-from python.MockPyHal.sx126x import MockSX126x
+from python.mock.sx126x import MockSX126x
+from python.mock.module import MockModule
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +37,7 @@ class PyMockHal(RadioLibHal):
         self._agg: MagicMock = MagicMock(name='hal')
         self._millis: int = 0
         self._modem_type: Optional[str] = None
-        self._modem: Optional[Any] = None
+        self._modem: Optional[MockModule] = None
 
         self._pins_map: Dict[int, PinInfo] = {}
 
@@ -81,6 +83,7 @@ class PyMockHal(RadioLibHal):
 
         self._agg.digitalWrite(pin, value)
 
+
     def digitalRead(self, pin: int) -> int:
         if pin == 0xffffffff:
             return 0
@@ -123,11 +126,8 @@ class PyMockHal(RadioLibHal):
         self._agg.spiBeginTransaction()
 
     def spiTransfer(self, out: bytes):
-        # out_hex = " ".join(["{:02x}".format(x) for x in out])
-        # _LOGGER.debug(f"SPI transmit: {out_hex}")
-
         if self._modem_type is not None:
-            data = self._spi_parser(out)
+            data = self._transfer(out)
             if data is not None:
                 self._agg.spiTransfer.return_value = data
 
@@ -162,33 +162,7 @@ class PyMockHal(RadioLibHal):
     def pinToInterrupt(self, pin) -> int:
         return self._agg.pinToInterrupt(pin)
 
-    def _spi_parser(self, data: bytes) -> Optional[bytes]:
-        if self._modem_type is None:
+    def _transfer(self, data: bytes) -> Optional[bytes]:
+        if self._modem_type is None or self._modem is None:
             return None
-
-        call = {
-            "sx1261": self._spi_parser_sx126x,
-            "sx1262": self._spi_parser_sx126x,
-            "sx1268": self._spi_parser_sx126x,
-        }
-
-        if self._modem_type in call.keys():
-            return call[self._modem_type](data)
-
-        return None
-
-    def _spi_parser_sx126x(self, data: bytes) -> Optional[bytes]:
-        if self._modem is None:
-            return None
-
-        data_len = len(data)
-
-
-        op_code: int = data[0]
-        data = data[1:]
-        payload: Union[bytes, int] = data[0] if len(data) == 1 else data
-
-        if op_code in self._modem.commands.keys():
-            return self._modem.commands[op_code](payload=payload, len_=data_len)
-
-        return None
+        return self._modem.transfer(data)
