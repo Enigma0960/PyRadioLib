@@ -3,20 +3,27 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, Callable
 
 from pyradiolib.modules import Sx126xCommands
-from python.mock.module import MockModule, StandbyMode
+from python.mock.module import MockModule, StandbyMode, TcxoVoltage, PacketType
 
 _LOGGER = logging.getLogger(__name__)
 
 NOP_BYTE = b"\xa2"
 
 REGISTER_0_DEFAULT_MAP = {
-    0x0320: b"SX1261 V2D 2D02\x00"
+    0x0320: b"SX1261 V2D 2D02\x00",  # or SX1268
+    0x0736: b"\x0d",
+    0x0740: b"\x14",
+    0x08e7: b"\x18",
+    0x08d8: b"\xc8",
 }
 
 
 @dataclass
 class ModuleParameters:
     standby_mode: StandbyMode = StandbyMode.Default
+    tcxo_voltage: TcxoVoltage = TcxoVoltage.V1p6
+    tcxo_delay: int = 0
+    packet_type: PacketType = PacketType.Fsk
 
 
 @dataclass
@@ -36,6 +43,14 @@ class MockSX126x(MockModule):
 
         self._register: ModuleRegisters = ModuleRegisters()
         self._register.register_0 = REGISTER_0_DEFAULT_MAP
+
+        self._init_by_type()
+
+    def _init_by_type(self):
+        if self._type == "sx1261" or self._type == "sx1262":
+            self._register.register_0[0x0320] = b"SX1261 V2D 2D02\x00"
+        elif self._type == "sx1268":
+            self._register.register_0[0x0320] = b"SX1268 V2D 2D02\x00"
 
     def _normalize(self, data: bytes) -> bytes:
         if len(data) < self._current_len:
@@ -128,6 +143,7 @@ class MockSX126x(MockModule):
         if command not in command_handlers.keys():
             return None
 
+        _LOGGER.debug(f"SX126x.transfer: command: {command.name}")
         try:
             command_handlers[command](data)
         except Exception as e:
@@ -137,6 +153,7 @@ class MockSX126x(MockModule):
         return self._pop()
 
     def _read_register(self, addr: int) -> Optional[bytes]:
+        _LOGGER.debug(f"SX126x.ReadRegister: data: {hex(addr)}")
         if addr in self._register.register_0.keys():
             return self._register.register_0[addr]
         elif addr in self._register.register_1.keys():
@@ -144,8 +161,14 @@ class MockSX126x(MockModule):
         else:
             return None
 
-    def _write_register(self, addr: int, value: int):
-        pass
+    def _write_register(self, addr: int, value: bytes):
+        _LOGGER.debug(f"SX126x.WriteRegister: addr: {hex(addr)}, value: {value}")
+        if addr in self._register.register_0.keys():
+            self._register.register_0[addr] = value
+        elif addr in self._register.register_1.keys():
+            self._register.register_1[addr] = value
+        else:
+            _LOGGER.warning(f"SX126x.WriteRegister: register not found: {hex(addr)}")
 
     def _cmd_nop(self, data: bytes):
         self._push(NOP_BYTE)
@@ -159,6 +182,7 @@ class MockSX126x(MockModule):
         except ValueError:
             _LOGGER.warning(f"SX126x.SetStandby: unknown standby mode: {data[0]}")
             return
+        self._push(b"\x01")
 
     def _cmd_set_fs(self, data: bytes):
         pass
@@ -199,23 +223,23 @@ class MockSX126x(MockModule):
     def _cmd_set_rx_tx_fallback_mode(self, data: bytes):
         pass
 
+    def _cmd_read_registor(self, data: bytes):
+        register_addr = int.from_bytes(data[0:2])
+        value = self._read_register(register_addr)
+        if value is None:
+            _LOGGER.warning(f"SX126x.ReadRegister: register {hex(register_addr)} not found")
+            return
+
+        self._push(value)
+
     def _cmd_write_register(self, data: bytes):
         register_addr = int.from_bytes(data[0:2])
-        register_value = int.from_bytes(data[2:])
+        register_value = data[2:]
 
         self._write_register(
             register_addr,
             register_value
         )
-
-    def _cmd_read_registor(self, data: bytes):
-        register_addr = int.from_bytes(data[0:2])
-        value = self._read_register(register_addr)
-        if value is None:
-            _LOGGER.warning(f"SX126x.ReadRegister: register {register_addr} not found")
-            return
-
-        self._push(value)
 
     def _cmd_write_buffer(self, data: bytes):
         pass
@@ -236,16 +260,30 @@ class MockSX126x(MockModule):
         pass
 
     def _cmd_set_dio3_as_tcxo_ctrl(self, data: bytes):
-        pass
+        try:
+            tcxo_voltage = TcxoVoltage(data[0])
+        except ValueError:
+            _LOGGER.warning(f"SX126x.SetDio3AsTcxoCtrl: unknown tcxo voltage: {data[0]}")
+            return
+
+        self._parameters.tcxo_voltage = tcxo_voltage
+        self._parameters.tcxo_delay = int.from_bytes(data[1:3])
+        self._push(b"\x00")
 
     def _cmd_set_rf_frequency(self, data: bytes):
         pass
 
     def _cmd_set_packet_type(self, data: bytes):
-        pass
+        try:
+            type = PacketType(data[0])
+        except ValueError:
+            _LOGGER.warning(f"SX126x.SetPacketType: unknown packet type: {data[0]}")
+            return
+        self._parameters.packet_type = type
 
     def _cmd_get_packet_type(self, data: bytes):
-        pass
+        type = self._parameters.packet_type.value
+        self._push(type)
 
     def _cmd_set_tx_params(self, data: bytes):
         pass

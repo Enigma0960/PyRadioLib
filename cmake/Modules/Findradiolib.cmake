@@ -44,6 +44,8 @@ target_include_directories(radiolib SYSTEM PRIVATE
         ${Radiolib_INCLUDE_DIR}
 )
 
+#target_compile_definitions(radiolib PUBLIC RADIOLIB_DEBUG_BASIC RADIOLIB_DEBUG_SPI RADIOLIB_DEBUG_PROTOCOL)
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
         Radiolib

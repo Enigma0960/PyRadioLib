@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 import pyradiolib
@@ -46,8 +48,6 @@ def make_radio(request: pytest.FixtureRequest, module: pyradiolib.Module, hal: P
             tcxoVoltage=1.6,
             useRegulatorLDO=False
         )
-
-    print(hal.agg.mock_calls)
 
     assert ModuleStatus(status) == ModuleStatus.Normal
 

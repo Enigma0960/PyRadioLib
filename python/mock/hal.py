@@ -57,6 +57,8 @@ class PyMockHal(RadioLibHal):
 
         modems = {
             "sx1261": MockSX126x,
+            "sx1262": MockSX126x,
+            "sx1268": MockSX126x,
         }
 
         if modem_type in modems.keys():
