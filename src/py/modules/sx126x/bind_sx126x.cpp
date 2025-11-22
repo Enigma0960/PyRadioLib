@@ -1,5 +1,6 @@
 #include "bind_sx126x.h"
 
+#include <filesystem>
 #include <py/bind_types.h>
 #include <radiolib/modules/SX126x/SX126x.h>
 
@@ -10,22 +11,52 @@ void bind_sx126x(py::module& module) {
 	    }),
 	        py::arg("module"),
 	        py::keep_alive<1, 2>())
-	    .def("begin", &SX126x::begin,
-	        py::arg("ch"),
-	        py::arg("syncWord"),
-	        py::arg("preambleLength"),
-	        py::arg("tcxoVoltage"),
-	        py::arg("useRegulatorLDO") = false)
-	    .def("beginFSK", &SX126x::beginFSK,
-	        py::arg("br"),
-	        py::arg("freqDev"),
-	        py::arg("rxBw"),
-	        py::arg("preambleLength"),
-	        py::arg("tcxoVoltage"),
-	        py::arg("useRegulatorLDO") = false)
-	    .def("beginLRFHS", &SX126x::beginLRFHSS)
-	    .def("setLrFhssConfig", &SX126x::beginLRFHSS)
-	    .def("reset", &SX126x::reset)
+	    .def("begin", [](SX126x& self, std::uint8_t cr, std::uint8_t syncWord, std::uint16_t preambleLength, float tcxoVoltage, bool useRegulatorLDO) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(
+			        self.begin(cr, syncWord, preambleLength, tcxoVoltage, useRegulatorLDO));
+		    }
+		    return status; //
+	    },
+	        py::arg("ch"), py::arg("syncWord"), py::arg("preambleLength"), py::arg("tcxoVoltage"), py::arg("useRegulatorLDO") = false)
+	    .def("beginFSK", [](SX126x& self, float br, float freqDev, float rxBw, uint16_t preambleLength, float tcxoVoltage, bool useRegulatorLDO) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(
+			        self.beginFSK(br, freqDev, rxBw, preambleLength, tcxoVoltage, useRegulatorLDO));
+		    }
+		    return status; //
+	    },
+	        py::arg("br"), py::arg("freqDev"), py::arg("rxBw"), py::arg("preambleLength"), py::arg("tcxoVoltage"), py::arg("useRegulatorLDO") = false)
+	    .def("beginLRFHSS", [](SX126x& self, std::uint8_t bw, std::uint8_t cr, bool narrowGrid, float tcxoVoltage, bool useRegulatorLDO) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(
+			        self.beginLRFHSS(bw, cr, narrowGrid, tcxoVoltage, useRegulatorLDO));
+		    }
+		    return status; //
+	    })
+	    .def("setLrFhssConfig", [](SX126x& self, std::uint8_t bw, std::uint8_t cr, std::uint8_t hdrCount, std::uint16_t hopSeqId) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(
+			        self.setLrFhssConfig(bw, cr, hdrCount, hopSeqId));
+		    }
+		    return status; //
+	    })
+	    .def("reset", [](SX126x& self, bool verify) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.reset(verify));
+		    }
+		    return status; //
+	    })
 	    .def("transmit", [](SX126x& self, py::buffer const& data, std::uint8_t addr) {
 		    py::buffer_info info = data.request();
 		    if (info.ndim != 1) {
@@ -39,22 +70,57 @@ void bind_sx126x(py::module& module) {
 		    }
 		    auto* ptr = static_cast<std::uint8_t const*>(info.ptr);
 		    auto len = static_cast<std::size_t>(info.size);
-		    py::gil_scoped_release release;
-		    return self.transmit(ptr, len, addr); //
+
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.transmit(ptr, len, addr));
+		    }
+		    return status; //
 	    },
 	        py::arg("data"), py::arg("addr") = 0)
-	    .def("receive", &SX126x::receive)
-	    .def("transmitDirect", &SX126x::transmitDirect)
-	    .def("receiveDirect", &SX126x::receiveDirect)
-	    .def("scanChannel", py::overload_cast<>(&SX126x::scanChannel))
+	    .def("receive", [](SX126x& self, uint8_t* data, size_t len, RadioLibTime_t timeout) {
+		    // TODO: Fix data read!
+
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.receive(data, len, timeout));
+		    }
+		    return status; //
+	    })
+	    .def("transmitDirect", [](SX126x& self, uint32_t frf) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.transmitDirect(frf));
+		    }
+		    return status; //
+	    })
+	    .def("receiveDirect", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.receiveDirect());
+		    }
+		    return status; //
+	    })
+	    .def("scanChannel", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.scanChannel());
+		    }
+		    return status; //
+	    })
 	    .def("scanChannel", [](SX126x& self, CADScanConfig config) {
 		    ChannelScanConfig_t cfg{};
 		    cfg.cad = config;
 
-		    uint16_t status = 0;
+		    ModuleStatus status{};
 		    {
 			    py::gil_scoped_release const release;
-			    status = self.scanChannel(cfg);
+			    status = static_cast<ModuleStatus>(self.scanChannel(cfg));
 		    }
 		    return status; //
 	    })
@@ -62,18 +128,46 @@ void bind_sx126x(py::module& module) {
 		    ChannelScanConfig_t cfg{};
 		    cfg.rssi = config;
 
-		    uint16_t status = 0;
+		    ModuleStatus status{};
 		    {
 			    py::gil_scoped_release const release;
-			    status = self.scanChannel(cfg);
+			    status = static_cast<ModuleStatus>(self.scanChannel(cfg));
 		    }
 		    return status; //
 	    })
-	    .def("sleep", py::overload_cast<>(&SX126x::sleep))
-	    .def("sleep", py::overload_cast<bool>(&SX126x::sleep))
-	    .def("standby", py::overload_cast<>(&SX126x::standby))
-	    .def("standby", py::overload_cast<uint8_t, bool>(&SX126x::standby))
-	    .def("hopLRFHSS", &SX126x::hopLRFHSS)
+	    .def("sleep", [](SX126x& self, bool retainConfig) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.sleep(retainConfig));
+		    }
+		    return status; //
+	    },
+	        py::arg("retainConfig") = true)
+	    .def("standby", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.standby());
+		    }
+		    return status; //
+	    })
+	    .def("standby", [](SX126x& self, std::uint8_t mode, bool wakeup) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.standby(mode, wakeup));
+		    }
+		    return status; //
+	    })
+	    .def("hopLRFHSS", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.hopLRFHSS());
+		    }
+		    return status; //
+	    })
 	    // .def("setDio1Action", &SX126x::setDio1Action) // func
 	    .def("clearDio1Action", &SX126x::clearDio1Action)
 	    // .def("setPacketReceivedAction", &SX126x::setPacketReceivedAction) // func
@@ -82,8 +176,22 @@ void bind_sx126x(py::module& module) {
 	    .def("clearPacketSentAction", &SX126x::clearPacketSentAction)
 	    // .def("setChannelScanAction", &SX126x::setChannelScanAction)  // func
 	    .def("clearChannelScanAction", &SX126x::clearChannelScanAction)
-	    .def("finishTransmit", &SX126x::finishTransmit)
-	    .def("finishReceive", &SX126x::finishReceive)
+	    .def("finishTransmit", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.finishTransmit());
+		    }
+		    return status; //
+	    })
+	    .def("finishReceive", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.finishReceive());
+		    }
+		    return status; //
+	    })
 	    .def("startReceive", [](SX126x& self) { return self.finishTransmit(); })
 	    .def("startReceiveDutyCycle", &SX126x::startReceiveDutyCycle)
 	    .def("startReceiveDutyCycleAuto", &SX126x::startReceiveDutyCycleAuto)
@@ -287,16 +395,72 @@ void bind_sx126x(py::module& module) {
 		    }
 		    return status; //
 	    })
-	    .def("launchMode", &SX126x::launchMode)
+	    .def("launchMode", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.launchMode());
+		    }
+		    return status; //
+	    })
 	    .def("setDirectAction", &SX126x::setDirectAction)
 	    .def("readBit", &SX126x::readBit)
-	    .def("uploadPatch", &SX126x::uploadPatch)
-	    .def("spectralScanStart", &SX126x::spectralScanStart)
+	    .def("uploadPatch", [](SX126x& self, std::uint32_t const* patch, size_t len, bool nonvolatile) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.uploadPatch(patch, len, nonvolatile));
+		    }
+		    return status; //
+	    })
+	    .def("spectralScanStart", [](SX126x& self, std::uint16_t numSamples, std::uint8_t window, std::uint8_t interval) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.spectralScanStart(numSamples, window, interval));
+		    }
+		    return status; //
+	    })
 	    .def("spectralScanAbort", &SX126x::spectralScanAbort)
-	    .def("spectralScanGetStatus", &SX126x::spectralScanGetStatus)
-	    .def("spectralScanGetResult", &SX126x::spectralScanGetResult)
+	    .def("spectralScanGetStatus", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.spectralScanGetStatus());
+		    }
+		    return status; //
+	    })
+	    .def("spectralScanGetResult", [](SX126x& self, uint16_t* results) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.spectralScanGetResult(results));
+		    }
+		    return status; //
+	    })
 	    .def("setPaConfig", &SX126x::setPaConfig)
-	    .def("calibrateImage", py::overload_cast<float>(&SX126x::calibrateImage))
-	    .def("calibrateImageRejection", &SX126x::calibrateImageRejection)
-	    .def("setPaRampTime", &SX126x::setPaRampTime);
+	    .def("calibrateImage", [](SX126x& self, float freq) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.calibrateImage(freq));
+		    }
+		    return status; //
+	    })
+	    .def("calibrateImageRejection", [](SX126x& self, float freqMin, float freqMax) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.calibrateImageRejection(freqMin, freqMax));
+		    }
+		    return status; //
+	    })
+	    .def("setPaRampTime", [](SX126x& self, std::uint8_t rampTime) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setPaRampTime(rampTime));
+		    }
+		    return status; //
+	    });
 }
