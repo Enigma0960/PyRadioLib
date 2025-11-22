@@ -268,14 +268,70 @@ void bind_sx126x(py::module& module) {
 		    }
 		    return status; //
 	    })
-	    .def("setRxBandwidth", &SX126x::setRxBandwidth)
-	    .def("setRxBoostedGainMode", &SX126x::setRxBoostedGainMode)
-	    .def("setDataShaping", &SX126x::setDataShaping)
-	    .def("setSyncBits", &SX126x::setSyncBits)
-	    .def("setCRC", &SX126x::setCRC)
-	    .def("setWhitening", &SX126x::setWhitening)
-	    .def("setTCXO", &SX126x::setTCXO)
-	    .def("setDio2AsRfSwitch", &SX126x::setDio2AsRfSwitch)
+	    .def("setRxBandwidth", [](SX126x& self, float rxBw) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setRxBandwidth(rxBw));
+		    }
+		    return status; //
+	    })
+	    .def("setRxBoostedGainMode", [](SX126x& self, bool rxbgm, bool persis) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setRxBoostedGainMode(rxbgm, persis));
+		    }
+		    return status; //
+	    })
+	    .def("setDataShaping", [](SX126x& self, uint8_t sh) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setDataShaping(sh));
+		    }
+		    return status; //
+	    })
+	    .def("setSyncBits", [](SX126x& self, uint8_t* syncWord, uint8_t bitsLen) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setSyncBits(syncWord, bitsLen));
+		    }
+		    return status; //
+	    })
+	    .def("setCRC", [](SX126x& self, uint8_t len, uint16_t initial, uint16_t polynomial, bool inverted) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setCRC(len, initial, polynomial, inverted));
+		    }
+		    return status; //
+	    })
+	    .def("setWhitening", [](SX126x& self, bool enabled, uint16_t initial) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setWhitening(enabled, initial));
+		    }
+		    return status; //
+	    })
+	    .def("setTCXO", [](SX126x& self, float voltage, uint32_t delay) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setTCXO(voltage, delay));
+		    }
+		    return status; //
+	    })
+	    .def("setDio2AsRfSwitch", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setDio2AsRfSwitch());
+		    }
+		    return status; //
+	    })
 	    .def("getDataRate", &SX126x::getDataRate)
 	    .def("getRSSI", py::overload_cast<>(&SX126x::getRSSI))
 	    .def("getRSSI", py::overload_cast<bool>(&SX126x::getRSSI))
@@ -283,9 +339,30 @@ void bind_sx126x(py::module& module) {
 	    .def("getFrequencyError", &SX126x::getFrequencyError)
 	    .def("getPacketLength", py::overload_cast<bool>(&SX126x::getPacketLength))
 	    .def("getPacketLength", py::overload_cast<bool, std::uint8_t*>(&SX126x::getPacketLength))
-	    .def("getLoRaRxHeaderInfo", &SX126x::getLoRaRxHeaderInfo)
-	    .def("fixedPacketLengthMode", &SX126x::fixedPacketLengthMode)
-	    .def("variablePacketLengthMode", &SX126x::variablePacketLengthMode)
+	    .def("getLoRaRxHeaderInfo", [](SX126x& self, uint8_t* cr, bool* hasCRC) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.getLoRaRxHeaderInfo(cr, hasCRC));
+		    }
+		    return status; //
+	    })
+	    .def("fixedPacketLengthMode", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.fixedPacketLengthMode());
+		    }
+		    return status; //
+	    })
+	    .def("variablePacketLengthMode", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.variablePacketLengthMode());
+		    }
+		    return status; //
+	    })
 	    .def("calculateTimeOnAir", [](SX126x& self, LoRaRate rate, LoRaPacketConfig config, size_t len) {
 		    DataRate_t dr{};
 		    PacketConfig_t cfg{};
@@ -331,20 +408,97 @@ void bind_sx126x(py::module& module) {
 	    .def("getTimeOnAir", &SX126x::getTimeOnAir)
 	    .def("calculateRxTimeout", &SX126x::calculateRxTimeout)
 	    .def("getIrqFlags", &SX126x::getIrqFlags)
-	    .def("setIrqFlags", &SX126x::setIrqFlags)
-	    .def("clearIrqFlags", &SX126x::clearIrqFlags)
-	    .def("implicitHeader", &SX126x::implicitHeader)
-	    .def("explicitHeader", &SX126x::explicitHeader)
-	    .def("setRegulatorLDO", &SX126x::setRegulatorLDO)
-	    .def("setRegulatorDCDC", &SX126x::setRegulatorDCDC)
-	    .def("setEncoding", &SX126x::setEncoding)
+	    .def("setIrqFlags", [](SX126x& self, uint32_t irq) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setIrqFlags(irq));
+		    }
+		    return status; //
+	    })
+	    .def("clearIrqFlags", [](SX126x& self, uint32_t irq) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.clearIrqFlags(irq));
+		    }
+		    return status; //
+	    })
+	    .def("implicitHeader", [](SX126x& self, size_t len) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.implicitHeader(len));
+		    }
+		    return status; //
+	    })
+	    .def("explicitHeader", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.explicitHeader());
+		    }
+		    return status; //
+	    })
+	    .def("setRegulatorLDO", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setRegulatorLDO());
+		    }
+		    return status; //
+	    })
+	    .def("setRegulatorDCDC", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setRegulatorDCDC());
+		    }
+		    return status; //
+	    })
+	    .def("setEncoding", [](SX126x& self, uint8_t encoding) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setEncoding(encoding));
+		    }
+		    return status; //
+	    })
 	    .def("setRfSwitchPins", &SX126x::setRfSwitchPins)
 	    // .def("setRfSwitchTable", &SX126x::setRfSwitchTable) // struct
-	    .def("forceLDRO", &SX126x::forceLDRO)
-	    .def("autoLDRO", &SX126x::autoLDRO)
+	    .def("forceLDRO", [](SX126x& self, bool enable) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.forceLDRO(enable));
+		    }
+		    return status; //
+	    })
+	    .def("autoLDRO", [](SX126x& self) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.autoLDRO());
+		    }
+		    return status; //
+	    })
 	    .def("randomByte", &SX126x::randomByte)
-	    .def("invertIQ", &SX126x::invertIQ)
-	    .def("getModem", &SX126x::getModem)
+	    .def("invertIQ", [](SX126x& self, bool enable) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.invertIQ(enable));
+		    }
+		    return status; //
+	    })
+	    .def("getModem", [](SX126x& self, ModemType_t* modem) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.getModem(modem));
+		    }
+		    return status; //
+	    })
 	    .def("stageMode", [](SX126x& self, StandbyConfig config) {
 		    RadioModeConfig_t cfg{};
 		    cfg.standby = config;
@@ -438,7 +592,14 @@ void bind_sx126x(py::module& module) {
 		    }
 		    return status; //
 	    })
-	    .def("setPaConfig", &SX126x::setPaConfig)
+	    .def("setPaConfig", [](SX126x& self, std::uint8_t paDutyCycle, std::uint8_t deviceSel, std::uint8_t hpMax, std::uint8_t paLut) {
+		    ModuleStatus status{};
+		    {
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.setPaConfig(paDutyCycle, deviceSel, hpMax, paLut));
+		    }
+		    return status; //
+	    })
 	    .def("calibrateImage", [](SX126x& self, float freq) {
 		    ModuleStatus status{};
 		    {

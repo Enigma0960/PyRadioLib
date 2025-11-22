@@ -11,16 +11,23 @@ void bind_sx1261(py::module& module) {
 	    }),
 	        py::arg("module"),
 	        py::keep_alive<1, 2>())
-	    .def("setOutputPower", &SX1261::setOutputPower,
+	    .def("setOutputPower", [](SX1261& self, std::int8_t power) {
+	    	ModuleStatus status{};
+			{
+				py::gil_scoped_release const release;
+				status = static_cast<ModuleStatus>(self.setOutputPower(power));
+			}
+	    	return status;
+	    },
 	        py::arg("power"))
 	    .def("checkOutputPower", [](SX1261& self, std::int8_t power) {
 		    std::int8_t clipped = 0;
-		    std::int16_t result = 0;
+		    ModuleStatus status{};
 		    {
-			    py::gil_scoped_release release;
-			    result = self.checkOutputPower(power, &clipped);
+			    py::gil_scoped_release const release;
+			    status = static_cast<ModuleStatus>(self.checkOutputPower(power, &clipped));
 		    }
-		    return py::make_tuple(result, clipped); //
+		    return py::make_tuple(status, clipped); //
 	    },
 	        py::arg("power"));
 }

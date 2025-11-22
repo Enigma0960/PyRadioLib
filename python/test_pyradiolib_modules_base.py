@@ -49,7 +49,7 @@ def make_radio(request: pytest.FixtureRequest, module: pyradiolib.Module, hal: P
             useRegulatorLDO=False
         )
 
-    assert ModuleStatus(status) == ModuleStatus.Normal
+    assert status == ModuleStatus.Normal
 
     return radio, request.param
 
