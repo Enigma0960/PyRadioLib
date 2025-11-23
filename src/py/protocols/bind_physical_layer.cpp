@@ -47,7 +47,7 @@ void bind_physical_layer(py::module& module) {
 		    }
 		    return status; //
 	    })
-	    .def("receive", [](PhysicalLayer& self, size_t len, RadioLibTime_t timeout) {
+	    .def("receive", [](PhysicalLayer& self, size_t len, uint32_t timeout) {
 		    if (len > MAX_PACKET_LENGTH) {
 			    len = MAX_PACKET_LENGTH;
 		    }
@@ -285,7 +285,7 @@ void bind_physical_layer(py::module& module) {
 	    .def("getPacketLength", &PhysicalLayer::getPacketLength)
 	    .def("getRSSI", &PhysicalLayer::getRSSI)
 	    .def("getSNR", &PhysicalLayer::getSNR)
-	    .def("calculateTimeOnAir", [](PhysicalLayer& self, ModemType_t modem, LoRaRate rate, LoRaPacketConfig config, size_t len) {
+	    .def("calculateTimeOnAir", [](PhysicalLayer& self, ModemType modem, LoRaRate rate, LoRaPacketConfig config, size_t len) {
 		    ModuleStatus status{};
 		    DataRate_t dr{};
 		    dr.lora = rate;
@@ -298,7 +298,7 @@ void bind_physical_layer(py::module& module) {
 		    }
 		    return status; //
 	    })
-	    .def("calculateTimeOnAir", [](PhysicalLayer& self, ModemType_t modem, FSKRate rate, FSKPacketConfig config, size_t len) {
+	    .def("calculateTimeOnAir", [](PhysicalLayer& self, ModemType modem, FSKRate rate, FSKPacketConfig config, size_t len) {
 		    ModuleStatus status{};
 		    DataRate_t dr{};
 		    dr.fsk = rate;
@@ -311,7 +311,7 @@ void bind_physical_layer(py::module& module) {
 		    }
 		    return status; //
 	    })
-	    .def("calculateTimeOnAir", [](PhysicalLayer& self, ModemType_t modem, LrFhssRate rate, LrFhssPacketConfig config, size_t len) {
+	    .def("calculateTimeOnAir", [](PhysicalLayer& self, ModemType modem, LrFhssRate rate, LrFhssPacketConfig config, size_t len) {
 		    ModuleStatus status{};
 		    DataRate_t dr{};
 		    dr.lrFhss = rate;

@@ -2,64 +2,6 @@
 
 #include <pybind11/native_enum.h>
 
-#include <radiolib/modules/SX126x/SX126x_commands.h>
-#include <radiolib/modules/SX126x/SX126x_registers.h>
-
-enum Sx126xCommands : std::uint8_t {
-	// operational modes commands
-	Nop = RADIOLIB_SX126X_CMD_NOP,
-	SetSleep = RADIOLIB_SX126X_CMD_SET_SLEEP,
-	SetStandby = RADIOLIB_SX126X_CMD_SET_STANDBY,
-	SetFs = RADIOLIB_SX126X_CMD_SET_FS,
-	SetTx = RADIOLIB_SX126X_CMD_SET_TX,
-	SetRx = RADIOLIB_SX126X_CMD_SET_RX,
-	StopTimerOnPreamble = RADIOLIB_SX126X_CMD_STOP_TIMER_ON_PREAMBLE,
-	SetRxDutyCycle = RADIOLIB_SX126X_CMD_SET_RX_DUTY_CYCLE,
-	SetCad = RADIOLIB_SX126X_CMD_SET_CAD,
-	SetTxContinuousWave = RADIOLIB_SX126X_CMD_SET_TX_CONTINUOUS_WAVE,
-	SetTxInfinitePreamble = RADIOLIB_SX126X_CMD_SET_TX_INFINITE_PREAMBLE,
-	SetRegulatorMode = RADIOLIB_SX126X_CMD_SET_REGULATOR_MODE,
-	Calibrate = RADIOLIB_SX126X_CMD_CALIBRATE,
-	CalibrateImage = RADIOLIB_SX126X_CMD_CALIBRATE_IMAGE,
-	SetPaConfig = RADIOLIB_SX126X_CMD_SET_PA_CONFIG,
-	SetRxTxFallbackMode = RADIOLIB_SX126X_CMD_SET_RX_TX_FALLBACK_MODE,
-	// operational modes commands
-	WriteRegister = RADIOLIB_SX126X_CMD_WRITE_REGISTER,
-	ReadRegister = RADIOLIB_SX126X_CMD_READ_REGISTER,
-	WriteBuffer = RADIOLIB_SX126X_CMD_WRITE_BUFFER,
-	ReadBuffer = RADIOLIB_SX126X_CMD_READ_BUFFER,
-	// DIO and IRQ control
-	SetDioIrqParams = RADIOLIB_SX126X_CMD_SET_DIO_IRQ_PARAMS,
-	GetIrqStatus = RADIOLIB_SX126X_CMD_GET_IRQ_STATUS,
-	ClearIrqStatus = RADIOLIB_SX126X_CMD_CLEAR_IRQ_STATUS,
-	SetDio2AsRfSwitchCtrl = RADIOLIB_SX126X_CMD_SET_DIO2_AS_RF_SWITCH_CTRL,
-	SetDio3AsTcxoCtrl = RADIOLIB_SX126X_CMD_SET_DIO3_AS_TCXO_CTRL,
-	// RF, modulation and packet commands
-	SetRfFrequency = RADIOLIB_SX126X_CMD_SET_RF_FREQUENCY,
-	SetPacketType = RADIOLIB_SX126X_CMD_SET_PACKET_TYPE,
-	GetPacketType = RADIOLIB_SX126X_CMD_GET_PACKET_TYPE,
-	SetTxParams = RADIOLIB_SX126X_CMD_SET_TX_PARAMS,
-	SetModulationParams = RADIOLIB_SX126X_CMD_SET_MODULATION_PARAMS,
-	SetPacketParams = RADIOLIB_SX126X_CMD_SET_PACKET_PARAMS,
-	SetCadParams = RADIOLIB_SX126X_CMD_SET_CAD_PARAMS,
-	SetBufferBaseAddress = RADIOLIB_SX126X_CMD_SET_BUFFER_BASE_ADDRESS,
-	SetLoraSymbNumTimeout = RADIOLIB_SX126X_CMD_SET_LORA_SYMB_NUM_TIMEOUT,
-	// status commands
-	GetStatus = RADIOLIB_SX126X_CMD_GET_STATUS,
-	GetRssiInst = RADIOLIB_SX126X_CMD_GET_RSSI_INST,
-	GetRxBufferStatus = RADIOLIB_SX126X_CMD_GET_RX_BUFFER_STATUS,
-	GetPacketStatus = RADIOLIB_SX126X_CMD_GET_PACKET_STATUS,
-	GetDeviceErrors = RADIOLIB_SX126X_CMD_GET_DEVICE_ERRORS,
-	ClearDeviceErrors = RADIOLIB_SX126X_CMD_CLEAR_DEVICE_ERRORS,
-	GetStats = RADIOLIB_SX126X_CMD_GET_STATS,
-	ResetStats = RADIOLIB_SX126X_CMD_RESET_STATS,
-	PramUpdate = RADIOLIB_SX126X_CMD_PRAM_UPDATE,
-	SetLbtScanParams = RADIOLIB_SX126X_CMD_SET_LBT_SCAN_PARAMS,
-	SetSpectrScanParams = RADIOLIB_SX126X_CMD_SET_SPECTR_SCAN_PARAMS,
-};
-
-
-
 void bind_sx126x_types(py::module& module) {
 	py::native_enum<Sx126xCommands>(module, "Sx126xCommands", "enum.IntEnum")
 	    // operational modes commands
@@ -115,5 +57,79 @@ void bind_sx126x_types(py::module& module) {
 	    .export_values()
 	    .finalize();
 
-
+	py::native_enum<Sx126xRegisters>(module, "Sx126xRegisters", "enum.IntEnum")
+	    .value("RxGainRetention0", RxGainRetention0)
+	    .value("RxGainRetention1", RxGainRetention1)
+	    .value("RxGainRetention2", RxGainRetention2)
+	    .value("VersionString", VersionString)
+	    .value("HoppingEnable", HoppingEnable)
+	    .value("LrFhssPacketLength", LrFhssPacketLength)
+	    .value("LrFhssNumHoppingBlocks", LrFhssNumHoppingBlocks)
+	    .value("LrFhssNumSymbolsFreqxMsb", LrFhssNumSymbolsFreqxMsb)
+	    .value("LrFhssNumSymbolsFreqxLsb", LrFhssNumSymbolsFreqxLsb)
+	    .value("LrFhssFreqx0", LrFhssFreqx0)
+	    .value("LrFhssFreqx1", LrFhssFreqx1)
+	    .value("LrFhssFreqx2", LrFhssFreqx2)
+	    .value("LrFhssFreqx3", LrFhssFreqx3)
+	    .value("SpectralScanResult", SpectralScanResult)
+	    .value("DioxOutEnable", DioxOutEnable)
+	    .value("DioxDriveStrength", DioxDriveStrength)
+	    .value("DioxInEnable", DioxInEnable)
+	    .value("DioxPullUpCtrl", DioxPullUpCtrl)
+	    .value("DioxPullDownCtrl", DioxPullDownCtrl)
+	    .value("TxBitbangEnable0", TxBitbangEnable0)
+	    .value("PatchUpdateEnable", PatchUpdateEnable)
+	    .value("TxBitbangEnable1", TxBitbangEnable1)
+	    .value("WhiteningInitialMsb", WhiteningInitialMsb)
+	    .value("WhiteningInitialLsb", WhiteningInitialLsb)
+	    .value("RxTxPldLen", RxTxPldLen)
+	    .value("CrcInitialMsb", CrcInitialMsb)
+	    .value("CrcInitialLsb", CrcInitialLsb)
+	    .value("CrcPolynomialMsb", CrcPolynomialMsb)
+	    .value("CrcPolynomialLsb", CrcPolynomialLsb)
+	    .value("SyncWord0", SyncWord0)
+	    .value("SyncWord1", SyncWord1)
+	    .value("SyncWord2", SyncWord2)
+	    .value("SyncWord3", SyncWord3)
+	    .value("SyncWord4", SyncWord4)
+	    .value("SyncWord5", SyncWord5)
+	    .value("SyncWord6", SyncWord6)
+	    .value("SyncWord7", SyncWord7)
+	    .value("NodeAddress", NodeAddress)
+	    .value("BroadcastAddress", BroadcastAddress)
+	    .value("PayloadLength", PayloadLength)
+	    .value("PacketParams", PacketParams)
+	    .value("LoraSyncTimeout", LoraSyncTimeout)
+	    .value("IqConfig", IqConfig)
+	    .value("LoraSyncWordMsb", LoraSyncWordMsb)
+	    .value("LoraSyncWordLsb", LoraSyncWordLsb)
+	    .value("Lora_RX_CODING_RATE", Lora_RX_CODING_RATE)
+	    .value("FreqErrorRxCrc", FreqErrorRxCrc)
+	    .value("SpectralScanStatus", SpectralScanStatus)
+	    .value("RxAddrPtr", RxAddrPtr)
+	    .value("RandomNumber0", RandomNumber0)
+	    .value("RandomNumber1", RandomNumber1)
+	    .value("RandomNumber2", RandomNumber2)
+	    .value("RandomNumber3", RandomNumber3)
+	    .value("SensitivityConfig", SensitivityConfig)
+	    .value("RfFrequency0", RfFrequency0)
+	    .value("RfFrequency1", RfFrequency1)
+	    .value("RfFrequency2", RfFrequency2)
+	    .value("RfFrequency3", RfFrequency3)
+	    .value("RssiAvgWindow", RssiAvgWindow)
+	    .value("RxGain", RxGain)
+	    .value("TxClampConfig", TxClampConfig)
+	    .value("AnaLna", AnaLna)
+	    .value("LnaCapTuneN", LnaCapTuneN)
+	    .value("LnaCapTuneP", LnaCapTuneP)
+	    .value("AnaMixer", AnaMixer)
+	    .value("OcpConfiguration", OcpConfiguration)
+	    .value("RtcCtrl", RtcCtrl)
+	    .value("XtaTrim", XtaTrim)
+	    .value("XtbTrim", XtbTrim)
+	    .value("Dio3OutVoltageCtrl", Dio3OutVoltageCtrl)
+	    .value("EventMask", EventMask)
+	    .value("PatchMemoryBase", PatchMemoryBase)
+	    .export_values()
+	    .finalize();
 }
