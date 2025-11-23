@@ -2,7 +2,6 @@
 
 #include <pybind11/native_enum.h>
 
-
 void bind_types(py::module& module) {
 	py::enum_<ModemType>(module, "ModemType", py::arithmetic())
 	    .value("RADIOLIB_MODEM_FSK", RADIOLIB_MODEM_FSK)
@@ -78,6 +77,19 @@ void bind_types(py::module& module) {
 
 	py::class_<SleepConfig>(module, "SleepConfig")
 	    .def_readwrite("mode", &SleepConfig::mode);
+
+	py::enum_<IrqType>(module, "IrqType")
+	    .value("IrqTxDone", IrqTxDone)
+	    .value("IrqRxDone", IrqRxDone)
+	    .value("IrqPreambleDetected", IrqPreambleDetected)
+	    .value("IrqSyncWordValid", IrqSyncWordValid)
+	    .value("IrqHeaderValid", IrqHeaderValid)
+	    .value("IrqHeaderErr", IrqHeaderErr)
+	    .value("IrqCrcErr", IrqCrcErr)
+	    .value("IrqCadDone", IrqCadDone)
+	    .value("IrqCadDetected", IrqCadDetected)
+	    .value("IrqTimeout", IrqTimeout)
+	    .value("IrqNotSupported", IrqNotSupported);
 
 	py::native_enum<ModuleStatus>(module, "ModuleStatus", "enum.IntEnum")
 	    .value("Normal", Normal)

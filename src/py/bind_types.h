@@ -25,6 +25,19 @@ using TransmitConfig = TransmitConfig_t;
 using ChannelScanConfig = ChannelScanConfig_t;
 using SleepConfig = SleepConfig_t;
 
+enum IrqType : uint8_t {
+	IrqTxDone = RADIOLIB_IRQ_TX_DONE,
+	IrqRxDone = RADIOLIB_IRQ_RX_DONE,
+	IrqPreambleDetected = RADIOLIB_IRQ_PREAMBLE_DETECTED,
+	IrqSyncWordValid = RADIOLIB_IRQ_SYNC_WORD_VALID,
+	IrqHeaderValid = RADIOLIB_IRQ_HEADER_VALID,
+	IrqHeaderErr = RADIOLIB_IRQ_HEADER_ERR,
+	IrqCrcErr = RADIOLIB_IRQ_CRC_ERR,
+	IrqCadDone = RADIOLIB_IRQ_CAD_DONE,
+	IrqCadDetected = RADIOLIB_IRQ_CAD_DETECTED,
+	IrqTimeout = RADIOLIB_IRQ_TIMEOUT,
+	IrqNotSupported = RADIOLIB_IRQ_NOT_SUPPORTED,
+};
 
 enum ModuleStatus : std::int16_t {
 	Normal = RADIOLIB_ERR_NONE,
