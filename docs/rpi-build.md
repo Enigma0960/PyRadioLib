@@ -346,14 +346,11 @@ cmake-build-debug-docker
 ```
 
    Где:
-
     * `/tmp/PROJECT_NAME` — путь, под которым CLion монтирует проект в контейнер.
       Его можно посмотреть в логах CMake/консоли CLion (на скриншоте это, например,
       `/tmp/PyRadioLib`).
     * `cmake/toolchains/rpi-arm64.cmake` — путь к toolchain-файлу относительно
       корня проекта.
-    * `-DBUILD_TESTING=OFF` — пример дополнительной опции, при необходимости
-      добавляйте свои.
 
 Скриншот (пример):
 ![CLion CMake profile](img/clion-cmake.png)
