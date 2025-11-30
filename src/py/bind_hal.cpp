@@ -81,14 +81,13 @@ void bind_hal(py::module_& module) {
 
 #if defined(__unix__) || defined(linux)
 	py::class_<PiHal, RadioLibHal, std::shared_ptr<PiHal>>(module, "PiHal")
-	    .def(py::init<std::uint32_t, std::uint32_t, std::uint32_t,
-	             std::uint32_t, std::uint32_t, std::uint32_t>(),
-	        py::arg("input"),
-	        py::arg("output"),
-	        py::arg("low"),
-	        py::arg("high"),
-	        py::arg("rising"),
-	        py::arg("falling"),
-	        R"()");
+	    .def(py::init<uint8_t, uint32_t, uint8_t, uint8_t>(),
+	        py::arg("spiChannel"),
+	        py::arg("spiSpeed") = 2000000,
+	        py::arg("spiDevice") = 0,
+	        py::arg("gpioDevice") = 0,
+	        R"()")
+		.def("init", &PiHal::init)
+		.def("term", &PiHal::term);
 #endif
 }

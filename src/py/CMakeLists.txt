@@ -1,6 +1,6 @@
 set(MODULE_NAME "pyradiolib")
 
-collect_sources(${CMAKE_CURRENT_SOURCE_DIR}  MODULE_HEADERS MODULE_SOURCES)
+collect_sources(${CMAKE_CURRENT_SOURCE_DIR} MODULE_HEADERS MODULE_SOURCES)
 
 pybind11_add_module(${MODULE_NAME} ${MODULE_SOURCES} ${MODULE_HEADERS})
 
@@ -41,13 +41,15 @@ add_custom_command(
         VERBATIM
 )
 
-add_custom_command(
-        TARGET ${MODULE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E env
-        "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
-        ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
-        -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
-        WORKING_DIRECTORY $<TARGET_FILE_DIR:${MODULE_NAME}>
-        COMMENT "Generating pyradiolib with pybind11-stubgen"
-        VERBATIM
-)
+if (NOT DEFINED IS_CROSSCOMPILING OR NOT ${IS_CROSSCOMPILING})
+    add_custom_command(
+            TARGET ${MODULE_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E env
+            "PYTHONPATH=$<TARGET_FILE_DIR:${MODULE_NAME}>"
+            ${Python3_EXECUTABLE} -m pybind11_stubgen ${MODULE_NAME}
+            -o "$<TARGET_FILE_DIR:${MODULE_NAME}>"
+            WORKING_DIRECTORY $<TARGET_FILE_DIR:${MODULE_NAME}>
+            COMMENT "Generating pyradiolib with pybind11-stubgen"
+            VERBATIM
+    )
+endif ()

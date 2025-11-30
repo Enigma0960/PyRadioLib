@@ -4,7 +4,9 @@ project(PyRadioLib VERSION 0.1.0 LANGUAGES CXX C)
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
+
+cmake_policy(SET CMP0156 NEW)
+cmake_policy(SET CMP0159 NEW)
 
 include(CollectSources)
 include(CopyHeaders)
@@ -16,9 +18,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+#set(CMAKE_MESSAGE_CONTEXT_SHOW ON)
+#set(CMAKE_FIND_DEBUG_MODE ON)
+#set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH ON)
 
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter Development Development.Module)
-
 
 add_subdirectory(src)
 
