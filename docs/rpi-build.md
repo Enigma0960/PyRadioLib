@@ -288,15 +288,15 @@ CLion сам:
 
 4. В поле **Image** укажите:
 
-```text
-rpi-cross-arm64:latest
-```
+    ```text
+    rpi-cross-arm64:latest
+    ```
 
 5. В поле **Container Settings** укажите:
 
-```text
---rm
-```
+    ```text
+    --rm
+    ```
 
    (контейнер будет автоматически удалён после завершения сборки).
 
@@ -335,20 +335,22 @@ rpi-cross-arm64:latest
 
 6. В поле **Build directory** задайте, например:
 
-```text
-cmake-build-debug-docker
-```
+    ```text
+    cmake-build-debug-docker
+    ```
 
 7. В поле **CMake options** укажите:
 
-```text
--DCMAKE_TOOLCHAIN_FILE=/tmp/PROJECT_NAME/cmake/toolchains/rpi-arm64.cmake -DBUILD_TESTING=OFF
-```
+    ```text
+    -DCMAKE_TOOLCHAIN_FILE=/tmp/PROJECT_NAME/cmake/toolchains/rpi-arm64.cmake -DBUILD_TESTING=OFF
+    ```
 
    Где:
+
     * `/tmp/PROJECT_NAME` — путь, под которым CLion монтирует проект в контейнер.
       Его можно посмотреть в логах CMake/консоли CLion (на скриншоте это, например,
       `/tmp/PyRadioLib`).
+
     * `cmake/toolchains/rpi-arm64.cmake` — путь к toolchain-файлу относительно
       корня проекта.
 
